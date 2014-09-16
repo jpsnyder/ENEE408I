@@ -1,4 +1,6 @@
 
+#include <Servo.h>
+
 // left wheel motor
 const int INA1 = 8;
 const int INB1 = 9;
@@ -8,11 +10,11 @@ const int INA2 = 11;
 const int INB2 = 12;
 const int PWM2 = 13;
 // left ping sensor
-const int ping_left = 7;
-const int pingservo_left = 7;
+const int ping_left = 22;
+const int pingservo_left = 6;   // PWM
 // right ping sensor
-const int ping_right = 7;
-const int pingservo_right = 7;
+const int ping_right = 24;
+const int pingservo_right = 7;  // PWM
 
 int PWM1_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
 int PWM2_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
@@ -30,13 +32,16 @@ void setup(){
   pinMode(PWM2, OUTPUT);
   // debuging serial connection
   Serial.begin(9600);
+
+  // set up ping servos
+
 }
 
 void loop(){
   // move left wheel
-  move_wheel(true, true, 127);
+  move_wheel(true, true, 255);
   // move right wheel backwards
-  move_wheel(false, false, 127);
+  move_wheel(false, false, 255);
   
   // read pings
   Serial.print("Left: ");
@@ -60,17 +65,21 @@ void move_wheel(boolean left_wheel, boolean forward, int speed){
   // is non-blocking
   int first = 0;
   int second = 0;
-  int* pins = 0;
+  int pins[3];
   
   if (left_wheel){
-    pins = [INA1, INB1, PWM1];
+    pins[0] = INA1;
+    pins[1] = INB1;
+    pins[2] = PWM1;
   } else {
-    pins = [INA2, INB2, PWM2]; 
+    pins[0] = INA2;
+    pins[1] = INB2;
+    pins[2] = PWM2;
   }
   
   if (forward){
     first = HIGH;
-    second = LOW: 
+    second = LOW;
   } else {
     first = LOW;
     second = HIGH; 
@@ -118,6 +127,7 @@ long ping_duration(int ping_pin, unsigned long timeout){
   // of the ping to the reception of its echo off of an object.
   pinMode(ping_pin, INPUT);
   
+  int duration;
   if (timeout){
       duration = pulseIn(ping_pin, HIGH, timeout);
   } else {
@@ -126,11 +136,11 @@ long ping_duration(int ping_pin, unsigned long timeout){
   return duration;
 }
 
-long ping_inches(int ping_pin, unsigned long timout){
+long ping_inches(int ping_pin, unsigned long timeout){
   return microseconds_to_inches(ping_duration(ping_pin, timeout));
 }
 
-long ping_centimeters(int ping_pin, unsigned long timout){
+long ping_centimeters(int ping_pin, unsigned long timeout){
   return microseconds_to_centimeters(ping_duration(ping_pin, timeout));
 }
 
