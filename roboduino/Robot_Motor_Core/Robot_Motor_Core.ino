@@ -1,11 +1,3 @@
-/* Motor Core
-
-  This code for the Arduino Robot's motor board
-  is the stock firmware. program the motor board with 
-  this sketch whenever you want to return the motor
-  board to its default state.
-  
-*/
 
 //#include <ArduinoRobotMotorBoard.h>
 int INA1 = 8;
@@ -20,6 +12,7 @@ int PWM2_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
 
 
 void setup(){
+  // set up wheel motors
   pinMode(INA1, OUTPUT);
   pinMode(INB1, OUTPUT);
   pinMode(PWM1, OUTPUT);
@@ -29,13 +22,43 @@ void setup(){
 }
 
 void loop(){
-  digitalWrite(INA1, HIGH);  // sets to go forward?
-  digitalWrite(INB1, LOW);
+  // move left wheel
+  move_wheel(true, true, 127);
+  // move right wheel backwards
+  move_wheel(false, false, 127);
+//  digitalWrite(INA1, HIGH);  // sets to go forward?
+//  digitalWrite(INB1, LOW);
+//  
+//  digitalWrite(INA2, HIGH);  // sets to go forward?
+//  digitalWrite(INB2, LOW);
+//  
+//  analogWrite(PWM1, PWM1_val);
+//  analogWrite(PWM2, PWM2_val);
   
-  digitalWrite(INA2, HIGH);  // sets to go forward?
-  digitalWrite(INB2, LOW);
+}
+
+void move_wheel(boolean left_wheel, boolean forward, int speed){
+  int first = 0;
+  int second = 0;
+  int* pins = 0;
   
-  analogWrite(PWM1, PWM1_val);
-  analogWrite(PWM2, PWM2_val);
+  if (left_wheel){
+    pins = [INA1, INB1, PWM1];
+  } else {
+    pins = [INA2, INB2, PWM2]; 
+  }
   
+  if (forward){
+    first = HIGH;
+    second = LOW: 
+  } else {
+    first = LOW;
+    second = HIGH; 
+  }
+  
+  // TODO: offset one of the motors
+  
+  digitalWrite(pins[0], first);
+  digitalWrite(pins[1], second);
+  analogWrite(pins[3], speed);
 }
