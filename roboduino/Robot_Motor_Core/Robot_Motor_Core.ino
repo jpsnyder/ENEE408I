@@ -10,10 +10,10 @@ const int INB2 = 12;
 const int PWM2 = 13;
 // left ping sensor
 const int ping_left = 22;
-const int pingservo_left = 6;   // PWM
+const int ping_servo_left = 6;   // PWM
 // right ping sensor
 const int ping_right = 24;
-const int pingservo_right = 7;  // PWM
+const int ping_servo_right = 7;  // PWM
 
 int PWM1_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
 int PWM2_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
@@ -31,9 +31,6 @@ void setup(){
   pinMode(PWM2, OUTPUT);
   // debuging serial connection
   Serial.begin(9600);
-
-  // set up ping servos
-
 }
 
 void loop(){
