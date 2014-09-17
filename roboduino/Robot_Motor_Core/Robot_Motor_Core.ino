@@ -34,10 +34,24 @@ void setup(){
 }
 
 void loop(){
-  // move right wheel
-  move_wheel(true, 0);
-  // move left wheel backwards
-  move_wheel(false, 0);
+  // detect pings
+  long left_inches = ping_inches(ping_left, 0);
+  long right_inches = ping_inches(ping_right, 0);
+  #define THRESHOLD 10
+  
+  
+  
+  int left_speed = (left_inches < THRESHOLD) ? 10 : 1;
+  int right_speed = (right_inches < THRESHOLD) ? 10 : 1;
+  
+  // don't run into a wall...
+  if (left_speed == 10 && right_speed == 10){
+    left_speed = -1;
+    right_speed = -10;
+  }
+  
+  move_wheel(true, right_speed);
+  move_wheel(false, left_speed);
   
   // read pings
   Serial.print("Left: ");
@@ -56,7 +70,7 @@ void loop(){
   
 }
 
-void move_wheel(boolean right_wheel, int speed){
+void move_wheel(boolean right_wheel, int wheel_speed){
   // moves the given wheel at given direction at given speed (25% = 64; 50% = 127; 75% = 191; 100% = 255)
   // is non-blocking
   int first = 0;
@@ -67,10 +81,10 @@ void move_wheel(boolean right_wheel, int speed){
     pins[0] = INA1;
     pins[1] = INB1;
     pins[2] = PWM1;
-    if (speed > 0){
+    if (wheel_speed > 0){
       first = LOW;
       second = HIGH;
-    } else if (speed < 0){
+    } else if (wheel_speed < 0){
       first = HIGH;
       second = LOW; 
     } else {
@@ -81,10 +95,10 @@ void move_wheel(boolean right_wheel, int speed){
     pins[0] = INA2;
     pins[1] = INB2;
     pins[2] = PWM2;
-    if (speed > 0){
+    if (wheel_speed > 0){
       first = HIGH;
       second = LOW;
-    } else if (speed < 0){
+    } else if (wheel_speed < 0){
       first = LOW;
       second = HIGH; 
     } else {
@@ -104,7 +118,7 @@ void move_wheel(boolean right_wheel, int speed){
   // TODO: offset one of the motors
   digitalWrite(pins[0], first);
   digitalWrite(pins[1], second);
-  analogWrite(pins[3], speed);
+  analogWrite(pins[3], wheel_speed);
 }
 
 long microseconds_to_inches(long microseconds)
