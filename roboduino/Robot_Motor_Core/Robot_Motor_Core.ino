@@ -1,11 +1,10 @@
-
 #include <Servo.h>
 
-// left wheel motor
+// right wheel motor
 const int INA1 = 8;
 const int INB1 = 9;
 const int PWM1 = 10;
-// right wheel motor
+// left wheel motor
 const int INA2 = 11;
 const int INB2 = 12;
 const int PWM2 = 13;
@@ -38,10 +37,10 @@ void setup(){
 }
 
 void loop(){
-  // move left wheel
-  move_wheel(true, true, 255);
-  // move right wheel backwards
-  move_wheel(false, false, 255);
+  // move right wheel
+  move_wheel(true, 0);
+  // move left wheel backwards
+  move_wheel(false, 0);
   
   // read pings
   Serial.print("Left: ");
@@ -60,30 +59,50 @@ void loop(){
   
 }
 
-void move_wheel(boolean left_wheel, boolean forward, int speed){
+void move_wheel(boolean right_wheel, int speed){
   // moves the given wheel at given direction at given speed (25% = 64; 50% = 127; 75% = 191; 100% = 255)
   // is non-blocking
   int first = 0;
   int second = 0;
   int pins[3];
   
-  if (left_wheel){
+  if (right_wheel){
     pins[0] = INA1;
     pins[1] = INB1;
     pins[2] = PWM1;
+    if (speed > 0){
+      first = LOW;
+      second = HIGH;
+    } else if (speed < 0){
+      first = HIGH;
+      second = LOW; 
+    } else {
+      first = LOW;
+      second = LOW;
+    }
   } else {
     pins[0] = INA2;
     pins[1] = INB2;
     pins[2] = PWM2;
+    if (speed > 0){
+      first = HIGH;
+      second = LOW;
+    } else if (speed < 0){
+      first = LOW;
+      second = HIGH; 
+    } else {
+      first = LOW;
+      second = LOW; 
+    }
   }
   
-  if (forward){
-    first = HIGH;
-    second = LOW;
-  } else {
-    first = LOW;
-    second = HIGH; 
-  }
+//  if (forward){
+//    first = LOW;
+//    second = HIGH;
+//  } else {
+//    first = HIGH;
+//    second = LOW; 
+//  }
   
   // TODO: offset one of the motors
   digitalWrite(pins[0], first);
@@ -143,4 +162,3 @@ long ping_inches(int ping_pin, unsigned long timeout){
 long ping_centimeters(int ping_pin, unsigned long timeout){
   return microseconds_to_centimeters(ping_duration(ping_pin, timeout));
 }
-
