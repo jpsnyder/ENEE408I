@@ -35,19 +35,32 @@ void setup(){
 
 void loop(){
   // detect pings
+  
+//  move_wheel(true, 64);
+//  move_wheel(false, 64);
+//  
+//  delay(2000);
+//  
+//  move_wheel(true, -64);
+//  move_wheel(false, -64);
+//  
+//  delay(2000);
+  
+  
   long left_inches = ping_inches(ping_left, 0);
   long right_inches = ping_inches(ping_right, 0);
   #define THRESHOLD 10
+  #define HIGH_SPEED 127
+  #define LOW_SPEED 40
   
   
-  
-  int left_speed = (left_inches < THRESHOLD) ? 10 : 1;
-  int right_speed = (right_inches < THRESHOLD) ? 10 : 1;
+  int left_speed = (left_inches < THRESHOLD) ? HIGH_SPEED : LOW_SPEED;
+  int right_speed = (right_inches < THRESHOLD) ? HIGH_SPEED : LOW_SPEED;
   
   // don't run into a wall...
-  if (left_speed == 10 && right_speed == 10){
-    left_speed = -1;
-    right_speed = -10;
+  if (left_speed == HIGH_SPEED && right_speed == HIGH_SPEED){
+    left_speed = -(LOW_SPEED-10);
+    right_speed = -(LOW_SPEED);
   }
   
   move_wheel(true, right_speed);
@@ -59,14 +72,6 @@ void loop(){
   Serial.print(", Right: ");
   Serial.print(ping_inches(ping_right, 0));
   Serial.println();
-//  digitalWrite(INA1, HIGH);  // sets to go forward?
-//  digitalWrite(INB1, LOW);
-//  
-//  digitalWrite(INA2, HIGH);  // sets to go forward?
-//  digitalWrite(INB2, LOW);
-//  
-//  analogWrite(PWM1, PWM1_val);
-//  analogWrite(PWM2, PWM2_val);
   
 }
 
@@ -118,7 +123,7 @@ void move_wheel(boolean right_wheel, int wheel_speed){
   // TODO: offset one of the motors
   digitalWrite(pins[0], first);
   digitalWrite(pins[1], second);
-  analogWrite(pins[3], wheel_speed);
+  analogWrite(pins[2], abs(wheel_speed));
 }
 
 long microseconds_to_inches(long microseconds)
