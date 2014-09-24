@@ -11,6 +11,8 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/libraries" />
             <option value="$PROJECT_DIR$/libraries/opencv" />
+            <option value="$PROJECT_DIR$/usbSerialExamples" />
+            <option value="$PROJECT_DIR$/usbSerialForAndroid" />
           </set>
         </option>
       </GradleProjectSettings>

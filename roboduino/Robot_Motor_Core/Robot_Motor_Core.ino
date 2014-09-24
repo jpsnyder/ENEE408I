@@ -8,12 +8,12 @@ const int PWM1 = 10;
 const int INA2 = 11;
 const int INB2 = 12;
 const int PWM2 = 13;
-// left ping sensor
-const int ping_left = 22;
-const int ping_servo_left = 6;   // PWM
 // right ping sensor
-const int ping_right = 24;
-const int ping_servo_right = 7;  // PWM
+const int ping_right = 22;
+const int ping_servo_right = 6;   // PWM
+// left ping sensor
+const int ping_left = 24;
+const int ping_servo_left = 7;  // PWM
 
 int PWM1_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
 int PWM2_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
@@ -45,21 +45,24 @@ void loop(){
 //  move_wheel(false, -64);
 //  
 //  delay(2000);
+
+  #define THRESHOLD 30   // Threshold in inches
+  #define HIGH_SPEED 150
+  #define LOW_SPEED 80
+  #define STOP 0
+  #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
+  
+  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
+  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
+
   
   
-  long left_inches = ping_inches(ping_left, 0);
-  long right_inches = ping_inches(ping_right, 0);
-  #define THRESHOLD 10
-  #define HIGH_SPEED 127
-  #define LOW_SPEED 40
-  
-  
-  int left_speed = (left_inches < THRESHOLD) ? HIGH_SPEED : LOW_SPEED;
-  int right_speed = (right_inches < THRESHOLD) ? HIGH_SPEED : LOW_SPEED;
+  int left_speed = ((right_inches < THRESHOLD) ? STOP : HIGH_SPEED) + LEFT_OFFSET;
+  int right_speed = (left_inches < THRESHOLD) ? STOP : HIGH_SPEED;
   
   // don't run into a wall...
-  if (left_speed == HIGH_SPEED && right_speed == HIGH_SPEED){
-    left_speed = -(LOW_SPEED-10);
+  if (left_speed == STOP && right_speed == STOP){
+    left_speed = -(LOW_SPEED);
     right_speed = -(LOW_SPEED);
   }
   
@@ -126,6 +129,14 @@ void move_wheel(boolean right_wheel, int wheel_speed){
   analogWrite(pins[2], abs(wheel_speed));
 }
 
+long inches_to_microseconds(long inches){
+  return inches * 2 * 74;
+}
+
+long centimeters_to_microseconds(long centimeters){
+  return centimeters * 2 * 29; 
+}
+
 long microseconds_to_inches(long microseconds)
 {
   // According to Parallax's datasheet for the PING))), there are
@@ -172,9 +183,9 @@ long ping_duration(int ping_pin, unsigned long timeout){
 }
 
 long ping_inches(int ping_pin, unsigned long timeout){
-  return microseconds_to_inches(ping_duration(ping_pin, timeout));
+  return microseconds_to_inches(ping_duration(ping_pin, inches_to_microseconds(timeout)));
 }
 
 long ping_centimeters(int ping_pin, unsigned long timeout){
-  return microseconds_to_centimeters(ping_duration(ping_pin, timeout));
+  return microseconds_to_centimeters(ping_duration(ping_pin, centimeters_to_microseconds(timeout)));
 }
