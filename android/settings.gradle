@@ -1,2 +1,0 @@
-include ':app', ':usbSerialForAndroid', ':usbSerialExamples'
-include ':libraries:opencv'
