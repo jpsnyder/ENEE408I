@@ -16,7 +16,7 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
-import org.opencv.core;
+//import org.opencv.core;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +39,7 @@ public class ArduinoController extends Activity {
 
                 @Override
                 public void onRunError(Exception e) {
-                    Log.d(TAG, "Runner stopped.");
+//                    Log.d(TAG, "Runner stopped.");
                 }
 
                 @Override
@@ -68,7 +68,7 @@ public class ArduinoController extends Activity {
 
     private void stopIoManager() {
         if (serialIOManager != null) {
-            Log.i(TAG, "Stopping io manager ..");
+//            Log.i(TAG, "Stopping io manager ..");
             serialIOManager.stop();
             serialIOManager = null;
         }
@@ -76,8 +76,8 @@ public class ArduinoController extends Activity {
 
     private void startIoManager() {
         if (arduinoPort != null) {
-            Log.i(TAG, "Starting io manager ..");
-            serialIOManager = new SerialInputOutputManager(sPort, mListener);
+//            Log.i(TAG, "Starting io manager ..");
+            serialIOManager = new SerialInputOutputManager(arduinoPort, mListener);
             executor.submit(serialIOManager);
         }
     }
@@ -91,12 +91,6 @@ public class ArduinoController extends Activity {
             b[i] = (byte) buffer[i];
         }
         return b;
-    }
-
-    private final Runnable MotorController = new Runnable(){
-        public void run(){
-
-        }
     }
 
     @Override
@@ -127,7 +121,7 @@ public class ArduinoController extends Activity {
     protected void onResume(){
         super.onResume();
 
-        if (arduinoPort == NULL){
+        if (arduinoPort == null){
             statusText.setText("Arduino Not Found!");
         } else {
 
@@ -142,7 +136,7 @@ public class ArduinoController extends Activity {
             // Open a connection to the first available driver.
             UsbSerialDriver driver = availableDrivers.get(0);
             UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
-            if (connection == NULL) {
+            if (connection == null) {
                 statusText.setText("Opening device Failed!");
                 return;
             }
@@ -158,10 +152,10 @@ public class ArduinoController extends Activity {
 
                 // Send command to go forward then backward  for testing purposes
                 arduinoPort.write(stringToBytesASCII("F"), 1000);
-                Thread.sleep(5000);
+//                Thread.sleep(5000);
                 arduinoPort.write(stringToBytesASCII("B"), 1000);
-                Thread.sleep(5000);
-                
+//                Thread.sleep(5000);
+
                 arduinoPort.close();
             } catch (IOException e) {
                 statusText.setText("Error opening device: " + e.getMessage());
