@@ -121,29 +121,38 @@ public class ArduinoController extends Activity {
     protected void onResume(){
         super.onResume();
 
+        // Find all available drivers from attached devices
+        final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        final List<UsbSerialDriver> drivers =
+                UsbSerialProber.getDefaultProber().findAllDrivers(usbManager);
+        if (drivers.isEmpty()){
+            statusText.setText("No drivers found!");
+            return;
+        }
+        // TODO: for now we are assuming the first one is the arduino....
+        arduinoPort = drivers.get(0).getPorts().get(0);
+//
         if (arduinoPort == null){
             statusText.setText("Arduino Not Found!");
         } else {
 
-            // Find all available drivers from attached devices
-            final UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
-            List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-            if (availableDrivers.isEmpty()){
-                statusText.setText("No Devices Found!");
+            UsbDeviceConnection connection = usbManager.openDevice(arduinoPort.getDriver().getDevice());
+            if (connection == null){
+                statusText.setText("Opening device failed!");
                 return;
             }
 
-            // Open a connection to the first available driver.
-            UsbSerialDriver driver = availableDrivers.get(0);
-            UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
-            if (connection == null) {
-                statusText.setText("Opening device Failed!");
-                return;
-            }
-
-            // TODO: create helper functions for this
-            // Write some data..
-            arduinoPort = driver.getPorts().get(0);
+//            // Open a connection to the first available driver.
+//            UsbSerialDriver driver = availableDrivers.get(0);
+//            UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
+//            if (connection == null) {
+//                statusText.setText("Opening device Failed!");
+//                return;
+//            }
+//
+//            // TODO: create helper functions for this
+//            // Write some data..
+//            arduinoPort = driver.getPorts().get(0);
             try {
                 arduinoPort.open(connection);
                 // set to send over 8 bits
