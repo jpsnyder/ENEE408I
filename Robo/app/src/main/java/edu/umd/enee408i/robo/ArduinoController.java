@@ -5,6 +5,7 @@ import android.content.Context;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ public class ArduinoController extends Activity {
     TextView sendCommandText;  // Center text that displays command being sent to arduino
     // TODO:  make a receive one
     private static UsbSerialPort arduinoPort = null;  // arduino port
+    private UsbManager usbManager;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private SerialInputOutputManager serialIOManager;
@@ -96,11 +98,16 @@ public class ArduinoController extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // TODO: don't have displayable activity?
         setContentView(R.layout.activity_arduino_controller);
 
         // setup text
         sendCommandText = (TextView) findViewById(R.id.sendCommandText);
         statusText = (TextView) findViewById(R.id.statusText);
+
+        // Find all available drivers from attached devices
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
     }
 
     @Override
@@ -121,9 +128,8 @@ public class ArduinoController extends Activity {
     protected void onResume(){
         super.onResume();
 
-        // Find all available drivers from attached devices
-        final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        final List<UsbSerialDriver> drivers =
+        SystemClock.sleep(1000);
+        List<UsbSerialDriver> drivers =
                 UsbSerialProber.getDefaultProber().findAllDrivers(usbManager);
         if (drivers.isEmpty()){
             statusText.setText("No drivers found!");
@@ -131,7 +137,7 @@ public class ArduinoController extends Activity {
         }
         // TODO: for now we are assuming the first one is the arduino....
         arduinoPort = drivers.get(0).getPorts().get(0);
-//
+
         if (arduinoPort == null){
             statusText.setText("Arduino Not Found!");
         } else {

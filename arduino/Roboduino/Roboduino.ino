@@ -52,19 +52,22 @@ void loop(){
   #define STOP 0
   #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
   
-  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
-  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
+//  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
+//  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
+//
+//  
+//  
+//  int left_speed = ((right_inches < THRESHOLD) ? STOP : HIGH_SPEED) + LEFT_OFFSET;
+//  int right_speed = (left_inches < THRESHOLD) ? STOP : HIGH_SPEED;
+//  
+//  // don't run into a wall...
+//  if (left_speed == STOP && right_speed == STOP){
+//    left_speed = -(LOW_SPEED);
+//    right_speed = -(LOW_SPEED);
+//  }
 
-  
-  
-  int left_speed = ((right_inches < THRESHOLD) ? STOP : HIGH_SPEED) + LEFT_OFFSET;
-  int right_speed = (left_inches < THRESHOLD) ? STOP : HIGH_SPEED;
-  
-  // don't run into a wall...
-  if (left_speed == STOP && right_speed == STOP){
-    left_speed = -(LOW_SPEED);
-    right_speed = -(LOW_SPEED);
-  }
+  int right_speed = LOW_SPEED;
+  int left_speed = LOW_SPEED;
   
   move_wheel(true, right_speed);
   move_wheel(false, left_speed);
