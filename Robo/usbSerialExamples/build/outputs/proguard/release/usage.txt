@@ -1,0 +1,84 @@
+com.hoho.android.usbserial.BuildConfig
+com.hoho.android.usbserial.BuildInfo
+com.hoho.android.usbserial.driver.CdcAcmSerialDriver:
+    private final java.lang.String TAG
+    50:58:public CdcAcmSerialDriver(android.hardware.usb.UsbDevice)
+    325:350:public static java.util.Map getSupportedDevices()
+    48:48:static synthetic java.lang.String access$000(com.hoho.android.usbserial.driver.CdcAcmSerialDriver)
+com.hoho.android.usbserial.driver.CdcAcmSerialDriver$CdcAcmSerialPort
+com.hoho.android.usbserial.driver.CommonUsbSerialPort
+com.hoho.android.usbserial.driver.Cp21xxSerialDriver:
+    44:47:public Cp21xxSerialDriver(android.hardware.usb.UsbDevice)
+    349:357:public static java.util.Map getSupportedDevices()
+    37:37:static synthetic java.lang.String access$000()
+com.hoho.android.usbserial.driver.Cp21xxSerialDriver$Cp21xxSerialPort
+com.hoho.android.usbserial.driver.FtdiSerialDriver:
+    107:110:public FtdiSerialDriver(android.hardware.usb.UsbDevice)
+    572:578:public static java.util.Map getSupportedDevices()
+com.hoho.android.usbserial.driver.FtdiSerialDriver$DeviceType
+com.hoho.android.usbserial.driver.FtdiSerialDriver$FtdiSerialPort
+com.hoho.android.usbserial.driver.ProlificSerialDriver:
+    private final java.lang.String TAG
+    46:54:public ProlificSerialDriver(android.hardware.usb.UsbDevice)
+    551:554:public static java.util.Map getSupportedDevices()
+    44:44:static synthetic java.lang.String access$000(com.hoho.android.usbserial.driver.ProlificSerialDriver)
+com.hoho.android.usbserial.driver.ProlificSerialDriver$ProlificSerialPort
+com.hoho.android.usbserial.driver.ProlificSerialDriver$ProlificSerialPort$1
+com.hoho.android.usbserial.driver.UsbId
+com.hoho.android.usbserial.driver.UsbSerialPort:
+    public static final int DATABITS_5
+    public static final int DATABITS_6
+    public static final int DATABITS_7
+    public static final int DATABITS_8
+    public static final int FLOWCONTROL_NONE
+    public static final int FLOWCONTROL_RTSCTS_IN
+    public static final int FLOWCONTROL_RTSCTS_OUT
+    public static final int FLOWCONTROL_XONXOFF_IN
+    public static final int FLOWCONTROL_XONXOFF_OUT
+    public static final int PARITY_NONE
+    public static final int PARITY_ODD
+    public static final int PARITY_EVEN
+    public static final int PARITY_MARK
+    public static final int PARITY_SPACE
+    public static final int STOPBITS_1
+    public static final int STOPBITS_1_5
+    public static final int STOPBITS_2
+    public abstract int getPortNumber()
+    public abstract java.lang.String getSerial()
+    public abstract boolean getCD()
+    public abstract boolean getCTS()
+    public abstract boolean getDSR()
+    public abstract boolean getDTR()
+    public abstract void setDTR(boolean)
+    public abstract boolean getRI()
+    public abstract boolean getRTS()
+    public abstract void setRTS(boolean)
+    public abstract boolean purgeHwBuffers(boolean,boolean)
+com.hoho.android.usbserial.driver.UsbSerialRuntimeException
+com.hoho.android.usbserial.examples.BuildConfig
+com.hoho.android.usbserial.examples.DeviceListActivity:
+    private static final int MESSAGE_REFRESH
+    private static final long REFRESH_TIMEOUT_MILLIS
+com.hoho.android.usbserial.examples.R
+com.hoho.android.usbserial.examples.R$attr
+com.hoho.android.usbserial.examples.R$drawable
+com.hoho.android.usbserial.examples.R$id
+com.hoho.android.usbserial.examples.R$layout
+com.hoho.android.usbserial.examples.R$string
+com.hoho.android.usbserial.examples.R$xml
+com.hoho.android.usbserial.util.HexDump:
+    23:23:public HexDump()
+    86:86:public static java.lang.String toHexString(byte)
+    115:117:public static byte[] toByteArray(byte)
+    141:148:private static int toByte(char)
+    152:160:public static byte[] hexStringToByteArray(java.lang.String)
+com.hoho.android.usbserial.util.SerialInputOutputManager:
+    private static final boolean DEBUG
+    private static final int READ_WAIT_MILLIS
+    private static final int BUFSIZ
+    82:83:public SerialInputOutputManager(com.hoho.android.usbserial.driver.UsbSerialPort)
+    94:95:public synchronized void setListener(com.hoho.android.usbserial.util.SerialInputOutputManager$Listener)
+    102:105:public void writeAsync(byte[])
+com.hoho.android.usbserial.util.SerialInputOutputManager$State:
+    53:53:public static com.hoho.android.usbserial.util.SerialInputOutputManager$State[] values()
+    53:53:public static com.hoho.android.usbserial.util.SerialInputOutputManager$State valueOf(java.lang.String)

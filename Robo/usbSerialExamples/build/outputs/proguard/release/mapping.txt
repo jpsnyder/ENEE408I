@@ -1,0 +1,116 @@
+com.hoho.android.usbserial.driver.CdcAcmSerialDriver -> com.hoho.android.usbserial.a.a:
+    android.hardware.usb.UsbDevice mDevice -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort mPort -> b
+    android.hardware.usb.UsbDevice getDevice() -> a
+    java.util.List getPorts() -> b
+com.hoho.android.usbserial.driver.Cp21xxSerialDriver -> com.hoho.android.usbserial.a.b:
+    android.hardware.usb.UsbDevice mDevice -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort mPort -> b
+    android.hardware.usb.UsbDevice getDevice() -> a
+    java.util.List getPorts() -> b
+com.hoho.android.usbserial.driver.FtdiSerialDriver -> com.hoho.android.usbserial.a.c:
+    android.hardware.usb.UsbDevice mDevice -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort mPort -> b
+    android.hardware.usb.UsbDevice getDevice() -> a
+    java.util.List getPorts() -> b
+com.hoho.android.usbserial.driver.ProbeTable -> com.hoho.android.usbserial.a.d:
+    java.util.Map mProbeTable -> a
+    com.hoho.android.usbserial.driver.ProbeTable addDriver(java.lang.Class) -> a
+    java.lang.Class findDriver(int,int) -> a
+com.hoho.android.usbserial.driver.ProlificSerialDriver -> com.hoho.android.usbserial.a.e:
+    android.hardware.usb.UsbDevice mDevice -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort mPort -> b
+    java.util.List getPorts() -> b
+    android.hardware.usb.UsbDevice getDevice() -> a
+com.hoho.android.usbserial.driver.UsbSerialDriver -> com.hoho.android.usbserial.a.f:
+    android.hardware.usb.UsbDevice getDevice() -> a
+    java.util.List getPorts() -> b
+com.hoho.android.usbserial.driver.UsbSerialPort -> com.hoho.android.usbserial.a.g:
+    com.hoho.android.usbserial.driver.UsbSerialDriver getDriver() -> a
+    int read$49634b7a() -> b
+com.hoho.android.usbserial.driver.UsbSerialProber -> com.hoho.android.usbserial.a.h:
+    com.hoho.android.usbserial.driver.ProbeTable mProbeTable -> a
+    com.hoho.android.usbserial.driver.UsbSerialProber getDefaultProber() -> a
+    com.hoho.android.usbserial.driver.UsbSerialDriver probeDevice(android.hardware.usb.UsbDevice) -> a
+com.hoho.android.usbserial.examples.DeviceListActivity -> com.hoho.android.usbserial.examples.DeviceListActivity:
+    java.lang.String TAG -> a
+    android.hardware.usb.UsbManager mUsbManager -> b
+    android.widget.ListView mListView -> c
+    android.widget.TextView mProgressBarTitle -> d
+    android.widget.ProgressBar mProgressBar -> e
+    android.os.Handler mHandler -> f
+    java.util.List mEntries -> g
+    android.widget.ArrayAdapter mAdapter -> h
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+    void access$000(com.hoho.android.usbserial.examples.DeviceListActivity) -> a
+    android.os.Handler access$100(com.hoho.android.usbserial.examples.DeviceListActivity) -> b
+    java.util.List access$200(com.hoho.android.usbserial.examples.DeviceListActivity) -> c
+    java.lang.String access$300(com.hoho.android.usbserial.examples.DeviceListActivity) -> d
+    void access$400(com.hoho.android.usbserial.examples.DeviceListActivity,com.hoho.android.usbserial.driver.UsbSerialPort) -> a
+    android.hardware.usb.UsbManager access$500(com.hoho.android.usbserial.examples.DeviceListActivity) -> e
+    android.widget.ArrayAdapter access$600(com.hoho.android.usbserial.examples.DeviceListActivity) -> f
+    android.widget.TextView access$700(com.hoho.android.usbserial.examples.DeviceListActivity) -> g
+    void access$800(com.hoho.android.usbserial.examples.DeviceListActivity) -> h
+com.hoho.android.usbserial.examples.DeviceListActivity$1 -> com.hoho.android.usbserial.examples.a:
+    com.hoho.android.usbserial.examples.DeviceListActivity this$0 -> a
+    void handleMessage(android.os.Message) -> handleMessage
+com.hoho.android.usbserial.examples.DeviceListActivity$2 -> com.hoho.android.usbserial.examples.b:
+    com.hoho.android.usbserial.examples.DeviceListActivity this$0 -> a
+    android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+com.hoho.android.usbserial.examples.DeviceListActivity$3 -> com.hoho.android.usbserial.examples.c:
+    com.hoho.android.usbserial.examples.DeviceListActivity this$0 -> a
+    void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+com.hoho.android.usbserial.examples.DeviceListActivity$4 -> com.hoho.android.usbserial.examples.d:
+    com.hoho.android.usbserial.examples.DeviceListActivity this$0 -> a
+    void onPostExecute(java.lang.Object) -> onPostExecute
+    java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+com.hoho.android.usbserial.examples.SerialConsoleActivity -> com.hoho.android.usbserial.examples.SerialConsoleActivity:
+    java.lang.String TAG -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort sPort -> b
+    android.widget.TextView mTitleTextView -> c
+    android.widget.TextView mDumpTextView -> d
+    android.widget.ScrollView mScrollView -> e
+    java.util.concurrent.ExecutorService mExecutor -> f
+    com.hoho.android.usbserial.util.SerialInputOutputManager mSerialIoManager -> g
+    com.hoho.android.usbserial.util.SerialInputOutputManager$Listener mListener -> h
+    void onCreate(android.os.Bundle) -> onCreate
+    void onPause() -> onPause
+    void onResume() -> onResume
+    void stopIoManager() -> a
+    void show(android.content.Context,com.hoho.android.usbserial.driver.UsbSerialPort) -> a
+    java.lang.String access$000(com.hoho.android.usbserial.examples.SerialConsoleActivity) -> a
+    void access$100(com.hoho.android.usbserial.examples.SerialConsoleActivity,byte[]) -> a
+com.hoho.android.usbserial.examples.SerialConsoleActivity$1 -> com.hoho.android.usbserial.examples.e:
+    com.hoho.android.usbserial.examples.SerialConsoleActivity this$0 -> a
+    void onRunError$698b7e31() -> a
+    void onNewData(byte[]) -> a
+com.hoho.android.usbserial.examples.SerialConsoleActivity$1$1 -> com.hoho.android.usbserial.examples.f:
+    byte[] val$data -> a
+    com.hoho.android.usbserial.examples.SerialConsoleActivity$1 this$1 -> b
+    void run() -> run
+com.hoho.android.usbserial.util.HexDump -> com.hoho.android.usbserial.b.a:
+    char[] HEX_DIGITS -> a
+    java.lang.String dumpHexString(byte[]) -> a
+    java.lang.String toHexString(byte[]) -> b
+    java.lang.String toHexString(int) -> a
+    java.lang.String toHexString(short) -> a
+com.hoho.android.usbserial.util.SerialInputOutputManager -> com.hoho.android.usbserial.b.b:
+    java.lang.String TAG -> a
+    com.hoho.android.usbserial.driver.UsbSerialPort mDriver -> b
+    java.nio.ByteBuffer mReadBuffer -> c
+    java.nio.ByteBuffer mWriteBuffer -> d
+    com.hoho.android.usbserial.util.SerialInputOutputManager$State mState -> e
+    com.hoho.android.usbserial.util.SerialInputOutputManager$Listener mListener -> f
+    com.hoho.android.usbserial.util.SerialInputOutputManager$Listener getListener() -> b
+    void stop() -> a
+    com.hoho.android.usbserial.util.SerialInputOutputManager$State getState() -> c
+    void run() -> run
+com.hoho.android.usbserial.util.SerialInputOutputManager$Listener -> com.hoho.android.usbserial.b.c:
+    void onNewData(byte[]) -> a
+    void onRunError$698b7e31() -> a
+com.hoho.android.usbserial.util.SerialInputOutputManager$State -> com.hoho.android.usbserial.b.d:
+    com.hoho.android.usbserial.util.SerialInputOutputManager$State STOPPED -> a
+    com.hoho.android.usbserial.util.SerialInputOutputManager$State RUNNING -> b
+    com.hoho.android.usbserial.util.SerialInputOutputManager$State STOPPING -> c

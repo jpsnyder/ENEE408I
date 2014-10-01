@@ -1,0 +1,4 @@
+com.hoho.android.usbserial.examples.DeviceListActivity
+com.hoho.android.usbserial.examples.DeviceListActivity: DeviceListActivity()
+com.hoho.android.usbserial.examples.SerialConsoleActivity
+com.hoho.android.usbserial.examples.SerialConsoleActivity: SerialConsoleActivity()
