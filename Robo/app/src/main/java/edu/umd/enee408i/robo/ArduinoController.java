@@ -32,6 +32,7 @@ public class ArduinoController extends Activity {
     // TODO:  make a receive one
     private static UsbSerialPort arduinoPort = null;  // arduino port
     private UsbManager usbManager;
+    //Innocuous comment
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private SerialInputOutputManager serialIOManager;
