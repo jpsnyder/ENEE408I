@@ -1,5 +1,6 @@
 package edu.umd.enee408i.robo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
@@ -22,15 +23,18 @@ import java.util.concurrent.Executors;
 public class ArduinoController {
 
     private static UsbSerialPort arduinoPort = null;  // arduino port
-    private UsbManager usbManager = null;
+    private static UsbManager usbManager = null;
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private SerialInputOutputManager serialIOManager;
+    // keep track of our main activity
+    private static Main mainActivity = null;
+
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static SerialInputOutputManager serialIOManager;
 
     // queue of received data from the Arduino
-    public Queue<String> retrievedData = new LinkedList<String>();
+    public static Queue<String> retrievedData = new LinkedList<String>();
 
-    private final SerialInputOutputManager.Listener serialListener =
+    private static final SerialInputOutputManager.Listener serialListener =
             new SerialInputOutputManager.Listener() {
 
                 @Override
@@ -40,23 +44,26 @@ public class ArduinoController {
 
                 @Override
                 public void onNewData(final byte[] data) {
-                    ArduinoController.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArduinoController.this.updateReceivedData(data);
-                        }
-                    });
+                    updateReceivedData(data);
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            updateReceivedData(data);
+//                        }
+//                    });
                 }
             };
 
-    private void onDeviceStateChange() {
+    private static void onDeviceStateChange() {
         stopIoManager();
         startIoManager();
     }
 
-    private void updateReceivedData(byte[] data) {
+    private static void updateReceivedData(byte[] data) {
         // TODO: parse data first? call another function?
-        retrievedData.add(new String(data));
+        String stringData = new String(data);
+        retrievedData.add(stringData);
+        mainActivity.receivedData(stringData);
 //        final String message = "Read " + data.length + " bytes: \n"
 //                + HexDump.dumpHexString(data) + "\n\n";
 //        sendCommandText.setText(message);  // display received data
@@ -64,7 +71,7 @@ public class ArduinoController {
 //        mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
     }
 
-    private void stopIoManager() {
+    private static void stopIoManager() {
         if (serialIOManager != null) {
 //            Log.i(TAG, "Stopping io manager ..");
             serialIOManager.stop();
@@ -72,7 +79,7 @@ public class ArduinoController {
         }
     }
 
-    private void startIoManager() {
+    private static void startIoManager() {
         if (arduinoPort != null) {
 //            Log.i(TAG, "Starting io manager ..");
             serialIOManager = new SerialInputOutputManager(arduinoPort, serialListener);
@@ -107,6 +114,7 @@ public class ArduinoController {
         // Find all available drivers from attached devices
         if (usbManager == null)
             usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        mainActivity = (Main) context;
 
         SystemClock.sleep(1000);
         List<UsbSerialDriver> drivers =

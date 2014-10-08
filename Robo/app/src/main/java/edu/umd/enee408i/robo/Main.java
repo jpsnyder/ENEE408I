@@ -36,6 +36,9 @@ public class Main extends Activity {
     protected void onResume(){
         super.onResume();
         ArduinoController.start(this);
+
+        // Test send command
+        ArduinoController.write("F");
     }
 
 
@@ -53,5 +56,10 @@ public class Main extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
+    }
+
+    // Called when arduino controller receives data
+    public void receivedData(String data){
+        statusText.setText("Received: " + data);
     }
 }
