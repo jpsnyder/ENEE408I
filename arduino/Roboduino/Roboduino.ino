@@ -1,5 +1,12 @@
 #include <Servo.h>
-
+#define LEFT 0
+#define RIGHT 1
+#define THRESHOLD 30   // Threshold in inches
+#define HIGH_SPEED 150
+#define LOW_SPEED 80
+#define STOP 0
+#define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
+#define ONE_ROTATION 3200  // number of ticks per rotation
 
 //left wheel encoder
 const int encoderLPinA = 2;
@@ -51,64 +58,14 @@ void setup(){
 }
 
 void loop(){
-  // detect pings
-  
-//  move_wheel(true, 64);
-//  move_wheel(false, 64);
-//  
-//  delay(2000);
-//  
-//  move_wheel(true, -64);
-//  move_wheel(false, -64);
-//  
-//  delay(2000);
 
-  #define LEFT 0
-  #define RIGHT 1
-  #define THRESHOLD 30   // Threshold in inches
-  #define HIGH_SPEED 150
-  #define LOW_SPEED 80
-  #define STOP 0
-  #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
-  #define ONE_ROTATION 3200  // number of ticks per rotation
-  
-//  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
-//  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
-//
-//  
-//  
-//  int left_speed = ((right_inches < THRESHOLD) ? STOP : HIGH_SPEED) + LEFT_OFFSET;
-//  int right_speed = (left_inches < THRESHOLD) ? STOP : HIGH_SPEED;
-//  
-//  // don't run into a wall...
-//  if (left_speed == STOP && right_speed == STOP){
-//    left_speed = -(LOW_SPEED);
-//    right_speed = -(LOW_SPEED);
-//  }
 
-  int right_rotations = encoderRPos/ONE_ROTATION;
-  int left_rotations = encoderLPos/ONE_ROTATION;
-// very small change
-  
-  int right_speed = (right_rotations < 3) ? HIGH_SPEED : STOP;
-  int left_speed = (left_rotations < 3) ? HIGH_SPEED : STOP;
+
   
   move_robot(LOW_SPEED, 3);
   delay(900100);
   //move_wheel(false, left_speed);
   
-  // read pings
-//  Serial.print("Left: ");
-//  Serial.print(ping_inches(ping_left, 0));
-//  Serial.print(", Right: ");
-//  Serial.print(ping_inches(ping_right, 0));
-//  Serial.println();
-
-
-
-
-
-
   Serial.print("L: ");
   Serial.print(encoderLPos);
   Serial.print(" R: ");
@@ -117,13 +74,40 @@ void loop(){
   
 }
 
+int report_distance(unsigned long distance){
+  if (SerialUSB.print("D")){
+    SerialUSB.print(distance); 
+  }
+}
+
+int report_angle(unsigned long angle){
+   if (SerialUSB.print("A")){
+     SerialUSB.print(angle); 
+   }
+}
+
+int follow_instructions(){
+  // read instructions
+  byte buff[50];
+  int size_instructions = sizeof(char) + sizeof(unsigned long);
+  if (SerialUSB.readBytes(buff, size_instructions) == 0)
+    return 0;
+  if ((char) buff[0] == 'D')
+    move_robot(LOW_SPEED, *((unsigned long*) (buff+1)));
+  if ((char) buff[0] == 'A')
+    rotate_robot(LOW_SPEED, *((unsigned long*) (buff+1)));
+}
+
+int send_to_android(char *string){
+  return SerialUSB.write(string); 
+}
 
 void rotate_robot(int wheel_speed, float angle){
   
   
 }
 
-float move_robot(int wheel_speed, float rotations){
+unsigned long move_robot(int wheel_speed, float rotations){
   int wheel_speedL = wheel_speed + LEFT_OFFSET;
   int wheel_speedR = wheel_speed;
   encoderLPos = 0;
@@ -161,6 +145,7 @@ float move_robot(int wheel_speed, float rotations){
   }
   move_wheel(RIGHT, STOP);
   move_wheel(LEFT, STOP);
+  return encoderLPos;  // return rough distance it went
 }
 
 void move_wheel(boolean right_wheel, int wheel_speed){
@@ -287,3 +272,24 @@ void doEncoderRA() {
 void doEncoderRB() {
   encoderRPos++;  
 }
+
+
+//  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
+//  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
+//
+//  
+//  
+//  int left_speed = ((right_inches < THRESHOLD) ? STOP : HIGH_SPEED) + LEFT_OFFSET;
+//  int right_speed = (left_inches < THRESHOLD) ? STOP : HIGH_SPEED;
+//  
+//  // don't run into a wall...
+//  if (left_speed == STOP && right_speed == STOP){
+//    left_speed = -(LOW_SPEED);
+//    right_speed = -(LOW_SPEED);
+//  }
+  // read pings
+//  Serial.print("Left: ");
+//  Serial.print(ping_inches(ping_left, 0));
+//  Serial.print(", Right: ");
+//  Serial.print(ping_inches(ping_right, 0));
+//  Serial.println();
