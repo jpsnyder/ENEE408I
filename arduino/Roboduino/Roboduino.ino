@@ -88,7 +88,7 @@ void loop(){
 
   int right_rotations = encoderRPos/ONE_ROTATION;
   int left_rotations = encoderLPos/ONE_ROTATION;
-
+// very small change
   
   int right_speed = (right_rotations < 3) ? HIGH_SPEED : STOP;
   int left_speed = (left_rotations < 3) ? HIGH_SPEED : STOP;
@@ -103,6 +103,12 @@ void loop(){
 //  Serial.print(", Right: ");
 //  Serial.print(ping_inches(ping_right, 0));
 //  Serial.println();
+
+
+
+
+
+
   Serial.print("L: ");
   Serial.print(encoderLPos);
   Serial.print(" R: ");
@@ -118,7 +124,7 @@ void rotate_robot(int wheel_speed, float angle){
 }
 
 float move_robot(int wheel_speed, float rotations){
-  int wheel_speedL = wheel_speed + 20;
+  int wheel_speedL = wheel_speed + LEFT_OFFSET;
   int wheel_speedR = wheel_speed;
   encoderLPos = 0;
   encoderRPos = 0;
@@ -142,15 +148,15 @@ float move_robot(int wheel_speed, float rotations){
     long diff =(long)((encoderLPos - startL) - (encoderRPos - startR));
     Serial.print(" Dif: ");
     Serial.println(diff);
-    if(diff < thresh)
+    if(abs(diff) < thresh)
       continue;
     else if(diff > 0){
       wheel_speedL -= 1;
-      wheel_speedR += 1;
+      //wheel_speedR += 1;
     }
     else {
       wheel_speedL += 1;
-      wheel_speedR -= 1;
+      //wheel_speedR -= 1;
     }
   }
   move_wheel(RIGHT, STOP);
