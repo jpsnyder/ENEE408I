@@ -4,11 +4,11 @@
 //left wheel encoder
 const int encoderLPinA = 2;
 const int encoderLPinB = 3;
-volatile unsigned int encoderLPos;
+volatile unsigned long encoderLPos;
 // right wheel encoder
 const int encoderRPinA = 4;
 const int encoderRPinB = 5;
-volatile unsigned int encoderRPos;
+volatile unsigned long encoderRPos;
 // right wheel motor
 const int INA1 = 8;
 const int INB1 = 9;
@@ -63,6 +63,8 @@ void loop(){
 //  
 //  delay(2000);
 
+  #define LEFT 0
+  #define RIGHT 1
   #define THRESHOLD 30   // Threshold in inches
   #define HIGH_SPEED 150
   #define LOW_SPEED 80
@@ -88,11 +90,12 @@ void loop(){
   int left_rotations = encoderLPos/ONE_ROTATION;
 
   
-  int right_speed = (right_rotations < 3) ? LOW_SPEED : STOP;
-  int left_speed = (left_rotations < 3) ? LOW_SPEED : STOP;
+  int right_speed = (right_rotations < 3) ? HIGH_SPEED : STOP;
+  int left_speed = (left_rotations < 3) ? HIGH_SPEED : STOP;
   
-  move_wheel(true, right_speed);
-  move_wheel(false, left_speed);
+  move_robot(LOW_SPEED, 3);
+  delay(900100);
+  //move_wheel(false, left_speed);
   
   // read pings
 //  Serial.print("Left: ");
@@ -100,12 +103,58 @@ void loop(){
 //  Serial.print(", Right: ");
 //  Serial.print(ping_inches(ping_right, 0));
 //  Serial.println();
-  Serial.print("Left rotations: ");
-  Serial.print(left_rotations);
-  Serial.print("Right rotations: ");
-  Serial.print(right_rotations);
+  Serial.print("L: ");
+  Serial.print(encoderLPos);
+  Serial.print(" R: ");
+  Serial.print(encoderRPos);
   Serial.println(); 
   
+}
+
+
+void rotate_robot(int wheel_speed, float angle){
+  
+  
+}
+
+float move_robot(int wheel_speed, float rotations){
+  int wheel_speedL = wheel_speed + 20;
+  int wheel_speedR = wheel_speed;
+  encoderLPos = 0;
+  encoderRPos = 0;
+  int thresh = 2;
+  //unsigned long start_posL = encoderLPos;
+  //unsigned long start_posR = encoderRPos;
+  //unsigned long start_time = millis();
+  float speedL, speedR;
+  
+  while(((encoderLPos / ONE_ROTATION) <= rotations) && ((encoderRPos / ONE_ROTATION) <= rotations)){
+    if(encoderLPos / ONE_ROTATION <= rotations)
+      move_wheel(LEFT, wheel_speedL);
+    else move_wheel(LEFT, STOP);
+    if(encoderRPos / ONE_ROTATION <= rotations)
+      move_wheel(RIGHT, wheel_speedR);
+    else move_wheel(RIGHT, STOP);
+    long startL = encoderLPos;
+    long startR = encoderRPos;
+    delay(50);
+    //time = millis();
+    long diff =(long)((encoderLPos - startL) - (encoderRPos - startR));
+    Serial.print(" Dif: ");
+    Serial.println(diff);
+    if(diff < thresh)
+      continue;
+    else if(diff > 0){
+      wheel_speedL -= 1;
+      wheel_speedR += 1;
+    }
+    else {
+      wheel_speedL += 1;
+      wheel_speedR -= 1;
+    }
+  }
+  move_wheel(RIGHT, STOP);
+  move_wheel(LEFT, STOP);
 }
 
 void move_wheel(boolean right_wheel, int wheel_speed){
@@ -115,6 +164,7 @@ void move_wheel(boolean right_wheel, int wheel_speed){
   int second = 0;
   int pins[3];
   
+  // Set INA, INB
   if (right_wheel){
     pins[0] = INA1;
     pins[1] = INB1;
@@ -145,13 +195,6 @@ void move_wheel(boolean right_wheel, int wheel_speed){
     }
   }
   
-//  if (forward){
-//    first = LOW;
-//    second = HIGH;
-//  } else {
-//    first = HIGH;
-//    second = LOW; 
-//  }
   
   // TODO: offset one of the motors
   digitalWrite(pins[0], first);
@@ -219,6 +262,9 @@ long ping_inches(int ping_pin, unsigned long timeout){
 long ping_centimeters(int ping_pin, unsigned long timeout){
   return microseconds_to_centimeters(ping_duration(ping_pin, centimeters_to_microseconds(timeout)));
 }
+
+
+// Wheel Encoder Interrupt Callbacks ========
 
 void doEncoderLA() {
   encoderLPos++;
