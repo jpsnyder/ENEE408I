@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 
 //import org.opencv.core;
 
-public class ByteUtils {
+class ByteUtils {
     private static ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
 
     public static byte[] longToBytes(long x) {
@@ -44,16 +44,46 @@ public class ByteUtils {
     }
 }
 
-
 public class Main extends Activity {
+
+    // Mapping Thread, Run all functions in here
+    class MappingTask implements Runnable {
+
+        boolean isRunning;
+
+        // called when ArduinoController gets data from arduino
+        public void receivedData(byte[] data){
+            statusText.setText("Received: " + new String(data));
+        }
+
+        @Override
+        public void run() {
+            isRunning = true;
+            while(isRunning) {
+                // Test send command
+                // TODO: make helper functions like move_robot and rotate_robot
+                ArduinoController.write(ByteUtils.concatenateByteArrays(
+                        ByteUtils.stringToBytes("D"),
+                        ByteUtils.longToBytes((long) 100)));
+                sendCommandText.setText("D100");
+                Thread.sleep(3000);
+                ArduinoController.write(ByteUtils.concatenateByteArrays(
+                        ByteUtils.stringToBytes("D"),
+                        ByteUtils.longToBytes((long) 1000)));
+                sendCommandText.setText("D1000");
+                Thread.sleep(3000);
+            }
+        }
+    }
 
     TextView statusText;
     TextView sendCommandText;  // Center text that displays command being sent to arduino
+    MappingTask mappingTask = new MappingTask();
+    Thread mappingThread = new Thread(mappingTask);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO: don't have displayable activity?
         setContentView(R.layout.activity_main);
 
         // setup text
@@ -65,6 +95,8 @@ public class Main extends Activity {
     protected void onPause() {
         super.onPause();
         ArduinoController.pause();
+        mappingTask.isRunning = false;  // TODO: probably some data races.. but who cares?!
+        mappingThread.join();
         finish();
     }
 
@@ -72,14 +104,8 @@ public class Main extends Activity {
     protected void onResume(){
         super.onResume();
         ArduinoController.start(this);
-
-        // Test send command
-        ArduinoController.write(ByteUtils.concatenateByteArrays(
-                ByteUtils.stringToBytes("D"),
-                ByteUtils.longToBytes((long) 100)));
+        mappingThread.start();
     }
-
-    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -98,7 +124,7 @@ public class Main extends Activity {
     }
 
     // Called when arduino controller receives data
-    public void receivedData(String data){
-        statusText.setText("Received: " + data);
+    public void receivedData(byte[] data){
+        mappingTask.receivedData(data);  // send over to mapping thread
     }
 }

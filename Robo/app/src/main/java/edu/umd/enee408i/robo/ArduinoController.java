@@ -61,9 +61,9 @@ public class ArduinoController {
 
     private static void updateReceivedData(byte[] data) {
         // TODO: parse data first? call another function?
-        String stringData = new String(data);
-        retrievedData.add(stringData);
-        mainActivity.receivedData(stringData);
+//        String stringData = new String(data);
+//        retrievedData.add(stringData);
+        mainActivity.receivedData(data);
 //        final String message = "Read " + data.length + " bytes: \n"
 //                + HexDump.dumpHexString(data) + "\n\n";
 //        sendCommandText.setText(message);  // display received data
