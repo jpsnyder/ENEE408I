@@ -1,5 +1,14 @@
 #include <Servo.h>
 
+
+//left wheel encoder
+const int encoderLPinA = 2;
+const int encoderLPinB = 3;
+volatile unsigned int encoderLPos;
+// right wheel encoder
+const int encoderRPinA = 4;
+const int encoderRPinB = 5;
+volatile unsigned int encoderRPos;
 // right wheel motor
 const int INA1 = 8;
 const int INB1 = 9;
@@ -15,13 +24,21 @@ const int ping_servo_right = 6;   // PWM
 const int ping_left = 24;
 const int ping_servo_left = 7;  // PWM
 
-int PWM1_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
-int PWM2_val = 127; //(25% = 64; 50% = 127; 75% = 191; 100% = 255)
-
-
-
 
 void setup(){
+  //left encoder setup
+  pinMode(encoderLPinA, INPUT);
+  pinMode(encoderLPinB, INPUT);
+  attachInterrupt(encoderLPinA, doEncoderLA, CHANGE);
+  attachInterrupt(encoderLPinB, doEncoderLB, CHANGE);
+  encoderLPos = 0;
+  //right encoder setup
+  pinMode(encoderRPinA, INPUT);
+  pinMode(encoderRPinB, INPUT);
+  attachInterrupt(encoderRPinA, doEncoderRA, CHANGE);
+  attachInterrupt(encoderRPinB, doEncoderRB, CHANGE);
+  encoderRPos = 0;
+  
   // set up wheel motors
   pinMode(INA1, OUTPUT);
   pinMode(INB1, OUTPUT);
@@ -51,6 +68,7 @@ void loop(){
   #define LOW_SPEED 80
   #define STOP 0
   #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
+  #define ONE_ROTATION 3200  // number of ticks per rotation (offset from 3200)
   
 //  long left_inches = ping_inches(ping_left, /*THRESHOLD + 5*/0);
 //  long right_inches = ping_inches(ping_right, /*THRESHOLD + 5*/0);
@@ -66,18 +84,28 @@ void loop(){
 //    right_speed = -(LOW_SPEED);
 //  }
 
-  int right_speed = LOW_SPEED;
-  int left_speed = LOW_SPEED;
-  
-  move_wheel(true, right_speed);
-  move_wheel(false, left_speed);
+  Serial.print("L: ");
+  Serial.print(encoderLPos);
+  Serial.print(" R: ");
+  Serial.print(encoderRPos);
+  Serial.println(); 
+
+//  int right_rotations = encoderRPos/ONE_ROTATION;
+//  int left_rotations = encoderLPos/ONE_ROTATION;
+//
+//  
+//  int right_speed = (right_rotations < 3) ? LOW_SPEED : STOP;
+//  int left_speed = (left_rotations < 3) ? LOW_SPEED : STOP;
+//  
+//  move_wheel(true, right_speed);
+//  move_wheel(false, left_speed);
   
   // read pings
-  Serial.print("Left: ");
-  Serial.print(ping_inches(ping_left, 0));
-  Serial.print(", Right: ");
-  Serial.print(ping_inches(ping_right, 0));
-  Serial.println();
+//  Serial.print("Left: ");
+//  Serial.print(ping_inches(ping_left, 0));
+//  Serial.print(", Right: ");
+//  Serial.print(ping_inches(ping_right, 0));
+//  Serial.println();
   
 }
 
@@ -117,14 +145,6 @@ void move_wheel(boolean right_wheel, int wheel_speed){
       second = LOW; 
     }
   }
-  
-//  if (forward){
-//    first = LOW;
-//    second = HIGH;
-//  } else {
-//    first = HIGH;
-//    second = LOW; 
-//  }
   
   // TODO: offset one of the motors
   digitalWrite(pins[0], first);
@@ -191,4 +211,20 @@ long ping_inches(int ping_pin, unsigned long timeout){
 
 long ping_centimeters(int ping_pin, unsigned long timeout){
   return microseconds_to_centimeters(ping_duration(ping_pin, centimeters_to_microseconds(timeout)));
+}
+
+void doEncoderLA() {
+  encoderLPos++;
+}
+
+void doEncoderLB() {
+  encoderLPos--;  
+}
+
+void doEncoderRA() {
+  encoderRPos++;
+}
+
+void doEncoderRB() {
+  encoderRPos--;  
 }

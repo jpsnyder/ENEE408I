@@ -24,9 +24,9 @@
             <file
                 path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialExamples/src/main/res/values/strings.xml"
                 qualifiers="" >
-                <string name="refreshing" >Refreshing...
-                </string>
                 <string name="app_name" >Serial Example
+                </string>
+                <string name="refreshing" >Refreshing...
                 </string>
                 <string name="app_title" >USB Serial Example
                 </string>

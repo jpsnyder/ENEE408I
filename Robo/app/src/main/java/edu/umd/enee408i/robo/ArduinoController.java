@@ -88,22 +88,12 @@ public class ArduinoController {
     }
 
 
-
-    private static byte[] stringToBytesASCII(String str) {
-        byte[] b = new byte[str.length()];
-        for (int i = 0; i < b.length; i++) {
-            b[i] = (byte) str.charAt(i);
-        }
-        return b;
-    }
-
-
-    public static int write(String data){
+    public static int write(byte[] data){
         if (arduinoPort == null)
             return 0;
         int bytesWritten;
         try {
-            bytesWritten = arduinoPort.write(stringToBytesASCII(data), 1000);
+            bytesWritten = arduinoPort.write(data, 1000);
         } catch (IOException e) {
             return 0;
         }

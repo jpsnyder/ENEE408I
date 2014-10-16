@@ -3,7 +3,7 @@ com.hoho.android.usbserial.BuildInfo
 com.hoho.android.usbserial.driver.CdcAcmSerialDriver:
     private final java.lang.String TAG
     50:58:public CdcAcmSerialDriver(android.hardware.usb.UsbDevice)
-    325:350:public static java.util.Map getSupportedDevices()
+    325:351:public static java.util.Map getSupportedDevices()
     48:48:static synthetic java.lang.String access$000(com.hoho.android.usbserial.driver.CdcAcmSerialDriver)
 com.hoho.android.usbserial.driver.CdcAcmSerialDriver$CdcAcmSerialPort
 com.hoho.android.usbserial.driver.CommonUsbSerialPort

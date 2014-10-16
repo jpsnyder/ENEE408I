@@ -6,7 +6,43 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.nio.ByteBuffer;
+
 //import org.opencv.core;
+
+public class ByteUtils {
+    private static ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
+
+    public static byte[] longToBytes(long x) {
+        buffer.putLong(0, x);
+        return buffer.array();
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip();//need flip
+        return buffer.getLong();
+    }
+
+    public static byte[] stringToBytes(String str) {
+        byte[] b = new byte[str.length()];
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (byte) str.charAt(i);
+        }
+        return b;
+    }
+
+    public static String bytesToString(byte[] bytes){
+        return new String(bytes);
+    }
+
+    public static byte[] concatenateByteArrays(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+}
 
 
 public class Main extends Activity {
@@ -38,9 +74,12 @@ public class Main extends Activity {
         ArduinoController.start(this);
 
         // Test send command
-        ArduinoController.write("F");
+        ArduinoController.write(ByteUtils.concatenateByteArrays(
+                ByteUtils.stringToBytes("D"),
+                ByteUtils.longToBytes((long) 100)));
     }
 
+    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
