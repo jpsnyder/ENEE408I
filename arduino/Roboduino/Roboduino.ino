@@ -7,6 +7,7 @@
 #define STOP 0
 #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
 #define ONE_ROTATION 3200  // number of ticks per rotation
+#define PI 3.14159265359
 
 //left wheel encoder
 const int encoderLPinA = 2;
@@ -60,19 +61,19 @@ void setup(){
 void loop(){
 
 
-
-  
+  move_robot(LOW_SPEED, 0.5);
+  rotate_robot(LOW_SPEED, 90);
+  move_robot(LOW_SPEED, 8);
+  rotate_robot(LOW_SPEED, -90);
   move_robot(LOW_SPEED, 3);
-  delay(900100);
-  //move_wheel(false, left_speed);
-  
-  Serial.print("L: ");
-  Serial.print(encoderLPos);
-  Serial.print(" R: ");
-  Serial.print(encoderRPos);
-  Serial.println(); 
   
 }
+
+  //Serial.print("L: ");
+  //Serial.print(encoderLPos);
+  //Serial.print(" R: ");
+  //Serial.print(encoderRPos);
+  //Serial.println(); 
 
 int report_distance(unsigned long distance){
   if (SerialUSB.print("D")){
@@ -103,8 +104,21 @@ int send_to_android(char *string){
 }
 
 void rotate_robot(int wheel_speed, float angle){
-  
-  
+  //counter-clockwise is positive
+  int wheel_speedL = angle > 0 ? -wheel_speed - LEFT_OFFSET: wheel_speed + LEFT_OFFSET; 
+  int wheel_speedR = angle > 0 ? wheel_speed : -wheel_speed;
+
+  long target = 15 * abs(angle); // 3600 * (arclength / wheel circumference)
+  encoderLPos = 0;
+  encoderRPos = 0;
+  while(wheel_speedL != STOP || wheel_speedR != STOP){
+    if(encoderLPos >= target)
+      wheel_speedL = STOP;
+    if(encoderRPos >= target)
+      wheel_speedR = STOP; 
+    move_wheel(LEFT, wheel_speedL);
+    move_wheel(RIGHT, wheel_speedR);
+  }
 }
 
 unsigned long move_robot(int wheel_speed, float rotations){
