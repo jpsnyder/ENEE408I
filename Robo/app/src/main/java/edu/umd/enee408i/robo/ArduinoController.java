@@ -5,6 +5,7 @@ import android.content.Context;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -21,6 +22,8 @@ import java.util.concurrent.Executors;
 
 
 public class ArduinoController {
+
+    public static final String TAG = "ROBO_ArduinoController";
 
     private static UsbSerialPort arduinoPort = null;  // arduino port
     private static UsbManager usbManager = null;
@@ -39,7 +42,7 @@ public class ArduinoController {
 
                 @Override
                 public void onRunError(Exception e) {
-//                    Log.d(TAG, "Runner stopped.");
+                    Log.d(TAG, "Runner stopped.");
                 }
 
                 @Override
@@ -73,7 +76,7 @@ public class ArduinoController {
 
     private static void stopIoManager() {
         if (serialIOManager != null) {
-//            Log.i(TAG, "Stopping io manager ..");
+            Log.i(TAG, "Stopping io manager ..");
             serialIOManager.stop();
             serialIOManager = null;
         }
@@ -81,7 +84,7 @@ public class ArduinoController {
 
     private static void startIoManager() {
         if (arduinoPort != null) {
-//            Log.i(TAG, "Starting io manager ..");
+            Log.i(TAG, "Starting io manager ..");
             serialIOManager = new SerialInputOutputManager(arduinoPort, serialListener);
             executor.submit(serialIOManager);
         }
@@ -101,26 +104,32 @@ public class ArduinoController {
     }
 
     public static String start(Context context){
+        Log.i(TAG, "Starting ArduinoController");
         // Find all available drivers from attached devices
         if (usbManager == null)
             usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         mainActivity = (Main) context;
 
+        Log.i(TAG, "Listing Drivers");
         SystemClock.sleep(1000);
         List<UsbSerialDriver> drivers =
                 UsbSerialProber.getDefaultProber().findAllDrivers(usbManager);
         if (drivers.isEmpty()){
+            Log.i(TAG, "No drivers found!");
             return "No drivers found!";
         }
         // TODO: for now we are assuming the first one is the arduino....
         arduinoPort = drivers.get(0).getPorts().get(0);
 
-        if (arduinoPort == null)
+        if (arduinoPort == null) {
+            Log.i(TAG, "Did not find arduino device.");
             return "Arduino Not Found!";
+        }
 
 
         UsbDeviceConnection connection = usbManager.openDevice(arduinoPort.getDriver().getDevice());
         if (connection == null){
+            Log.i(TAG, "Could not open device");
             return "Opening device failed!";
         }
 
@@ -132,6 +141,7 @@ public class ArduinoController {
             arduinoPort.close();
         } catch (IOException e) {
             String result = "Error opening device: " + e.getMessage();
+            Log.i(TAG, result);
             try {
                 arduinoPort.close();
             } catch (IOException e2){

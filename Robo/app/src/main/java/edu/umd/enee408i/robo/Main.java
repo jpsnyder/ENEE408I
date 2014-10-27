@@ -1,7 +1,16 @@
 package edu.umd.enee408i.robo;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.ActionListener;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -46,6 +55,8 @@ class ByteUtils {
 
 public class Main extends Activity {
 
+    public static final String TAG = "ROBO";
+
     // Mapping Thread, Run all functions in here
     class MappingTask implements Runnable {
 
@@ -62,16 +73,30 @@ public class Main extends Activity {
             while(isRunning) {
                 // Test send command
                 // TODO: make helper functions like move_robot and rotate_robot
+                Log.i(TAG, "Sending D100 to arduino");
                 ArduinoController.write(ByteUtils.concatenateByteArrays(
                         ByteUtils.stringToBytes("D"),
                         ByteUtils.longToBytes((long) 100)));
                 sendCommandText.setText("D100");
-                Thread.sleep(3000);
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted!");
+                    statusText.setText("Thread interrupted");
+                    e.printStackTrace();
+                }
+                Log.i(TAG, "Sending D1000 to arduino");
                 ArduinoController.write(ByteUtils.concatenateByteArrays(
                         ByteUtils.stringToBytes("D"),
                         ByteUtils.longToBytes((long) 1000)));
                 sendCommandText.setText("D1000");
-                Thread.sleep(3000);
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted again!");
+                    statusText.setText("Thread interrupted");
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -89,6 +114,8 @@ public class Main extends Activity {
         // setup text
         sendCommandText = (TextView) findViewById(R.id.sendCommandText);
         statusText = (TextView) findViewById(R.id.statusText);
+
+        Log.i(TAG, "Finished onCreate");
     }
 
     @Override
@@ -96,14 +123,19 @@ public class Main extends Activity {
         super.onPause();
         ArduinoController.pause();
         mappingTask.isRunning = false;  // TODO: probably some data races.. but who cares?!
-        mappingThread.join();
+        try {
+            mappingThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         finish();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        ArduinoController.start(this);
+        statusText.setText(ArduinoController.start(this));
+        Log.i(TAG, "Starting mappingThread.");
         mappingThread.start();
     }
 
@@ -125,6 +157,7 @@ public class Main extends Activity {
 
     // Called when arduino controller receives data
     public void receivedData(byte[] data){
+        Log.i(TAG, "Recieved from Arduino: " + data);
         mappingTask.receivedData(data);  // send over to mapping thread
     }
 }
