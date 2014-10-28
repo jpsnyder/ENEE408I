@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
@@ -13,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
@@ -106,6 +109,21 @@ public class Main extends Activity {
     MappingTask mappingTask = new MappingTask();
     Thread mappingThread = new Thread(mappingTask);
 
+    // Wifi stuff
+    boolean wasAPEnabled = false;
+    static WifiAP wifiAP;
+    private WifiManager wifi;
+    static Button btnWifiToggle;
+    public static void updateButtonStatus() {
+        if (wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLED || wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLING) {
+            btnWifiToggle.setText("Turn off WifiAP");
+            //findViewById(R.id.bg).setBackgroundResource(R.drawable.bg_wifi_on);
+        } else {
+            btnWifiToggle.setText("Turn on WifiAP");
+            //findViewById(R.id.bg).setBackgroundResource(R.drawable.bg_wifi_off);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +132,15 @@ public class Main extends Activity {
         // setup text
         sendCommandText = (TextView) findViewById(R.id.sendCommandText);
         statusText = (TextView) findViewById(R.id.statusText);
+
+        // Wifi stuff
+        wifiAP = new WifiAP();
+        wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        btnWifiToggle.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                wifiAP.toggleWiFiAP(wifi, Main.this);
+            }
+        });
 
         Log.i(TAG, "Finished onCreate");
     }
@@ -129,6 +156,16 @@ public class Main extends Activity {
             e.printStackTrace();
         }
         finish();
+
+        // Wifi stuff
+        boolean wifiApIsOn = wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLED || wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLING;
+        if (wifiApIsOn) {
+            wasAPEnabled = true;
+            wifiAP.toggleWiFiAP(wifi, Main.this);
+        } else {
+            wasAPEnabled = false;
+        }
+        updateButtonStatus();
     }
 
     @Override
@@ -137,6 +174,14 @@ public class Main extends Activity {
         statusText.setText(ArduinoController.start(this));
         Log.i(TAG, "Starting mappingThread.");
         mappingThread.start();
+
+        // Wifi stuff
+        if (wasAPEnabled) {
+            if (wifiAP.getWifiAPState()!=wifiAP.WIFI_AP_STATE_ENABLED && wifiAP.getWifiAPState()!=wifiAP.WIFI_AP_STATE_ENABLING){
+                wifiAP.toggleWiFiAP(wifi, Main.this);
+            }
+        }
+        updateButtonStatus();
     }
 
     @Override
