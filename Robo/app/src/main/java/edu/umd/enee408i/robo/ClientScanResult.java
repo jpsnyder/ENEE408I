@@ -33,4 +33,12 @@ public class ClientScanResult {
     public void setHWAddr(String hWAddr) {
         HWAddr = hWAddr;
     }
+
+    public String getDevice() {
+        return Device;
+    }
+
+    public boolean isReachable() {
+        return isReachable;
+    }
 }

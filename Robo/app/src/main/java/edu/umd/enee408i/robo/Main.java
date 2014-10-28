@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 //import org.opencv.core;
 
@@ -61,7 +63,7 @@ public class Main extends Activity {
     public static final String TAG = "ROBO";
 
     // Mapping Thread, Run all functions in here
-    class MappingTask implements Runnable {
+    class MappingTask extends AsyncTask<Void, String, Void>{
 
         boolean isRunning;
 
@@ -71,43 +73,56 @@ public class Main extends Activity {
         }
 
         @Override
-        public void run() {
+        protected void onProgressUpdate(String... progress) {
+            // update found clients
+            statusText.setText(progress[0]);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
-                // Test send command
-                // TODO: make helper functions like move_robot and rotate_robot
-                Log.i(TAG, "Sending D100 to arduino");
-                ArduinoController.write(ByteUtils.concatenateByteArrays(
-                        ByteUtils.stringToBytes("D"),
-                        ByteUtils.longToBytes((long) 100)));
-                sendCommandText.setText("D100");
+                publishProgress(scanDevices());
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted!");
-                    statusText.setText("Thread interrupted");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
-                Log.i(TAG, "Sending D1000 to arduino");
-                ArduinoController.write(ByteUtils.concatenateByteArrays(
-                        ByteUtils.stringToBytes("D"),
-                        ByteUtils.longToBytes((long) 1000)));
-                sendCommandText.setText("D1000");
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    statusText.setText("Thread interrupted");
-                    e.printStackTrace();
-                }
+
+//                // Test send command
+//                // TODO: make helper functions like move_robot and rotate_robot
+//                Log.i(TAG, "Sending D100 to arduino");
+//                ArduinoController.write(ByteUtils.concatenateByteArrays(
+//                        ByteUtils.stringToBytes("D"),
+//                        ByteUtils.longToBytes((long) 100)));
+//                sendCommandText.setText("D100");
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted!");
+//                    statusText.setText("Thread interrupted");
+//                    e.printStackTrace();
+//                }
+//                Log.i(TAG, "Sending D1000 to arduino");
+//                ArduinoController.write(ByteUtils.concatenateByteArrays(
+//                        ByteUtils.stringToBytes("D"),
+//                        ByteUtils.longToBytes((long) 1000)));
+//                sendCommandText.setText("D1000");
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    statusText.setText("Thread interrupted");
+//                    e.printStackTrace();
+//                }
             }
+            return null;
         }
     }
 
     TextView statusText;
     TextView sendCommandText;  // Center text that displays command being sent to arduino
     MappingTask mappingTask = new MappingTask();
-    Thread mappingThread = new Thread(mappingTask);
 
     // Wifi stuff
     boolean wasAPEnabled = false;
@@ -124,6 +139,20 @@ public class Main extends Activity {
         }
     }
 
+    private String scanDevices() {
+        ArrayList<ClientScanResult> clients = wifiAP.getClientList(false, 300);
+
+        String result = "Clients: \n";
+        for (ClientScanResult clientScanResult : clients) {
+            result += "####################\n";
+            result += "IpAddr: " + clientScanResult.getIpAddr() + "\n";
+            result += "Device: " + clientScanResult.getDevice() + "\n";
+            result += "HWAddr: " + clientScanResult.getHWAddr() + "\n";
+            result += "isReachable: " + clientScanResult.isReachable() + "\n";
+        }
+        return result;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +163,7 @@ public class Main extends Activity {
         statusText = (TextView) findViewById(R.id.statusText);
 
         // Wifi stuff
+        btnWifiToggle = (Button) findViewById(R.id.btnWifiToggle);
         wifiAP = new WifiAP();
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         btnWifiToggle.setOnClickListener(new View.OnClickListener(){
@@ -150,11 +180,11 @@ public class Main extends Activity {
         super.onPause();
         ArduinoController.pause();
         mappingTask.isRunning = false;  // TODO: probably some data races.. but who cares?!
-        try {
-            mappingThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+            mappingTask.cancel(true);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         finish();
 
         // Wifi stuff
@@ -173,7 +203,7 @@ public class Main extends Activity {
         super.onResume();
         statusText.setText(ArduinoController.start(this));
         Log.i(TAG, "Starting mappingThread.");
-        mappingThread.start();
+        mappingTask.execute();
 
         // Wifi stuff
         if (wasAPEnabled) {
