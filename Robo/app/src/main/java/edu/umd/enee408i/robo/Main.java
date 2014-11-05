@@ -97,8 +97,8 @@ public class Main extends Activity {
                 // TODO: make helper functions like move_robot and rotate_robot
                 String string = "D" + (new Float(2)).toString() + "\0";
                 Log.i(TAG, "Sending " + string + " to arduino");
-                ArduinoController.write(
-                        ByteUtils.stringToBytes(string));
+                //ArduinoController.write(ByteUtils.stringToBytes(string)
+                       // );
                 publishProgress("command", "D2");
                 try {
                     Thread.sleep(3000);
@@ -108,8 +108,8 @@ public class Main extends Activity {
                     e.printStackTrace();
                 }
                 Log.i(TAG, "Sending R180 to arduino");
-                ArduinoController.write(
-                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\0"));
+                //ArduinoController.write(
+                        //ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\0"));
                 publishProgress("command", "R180");
                 try {
                     Thread.sleep(3000);
