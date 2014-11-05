@@ -27,15 +27,15 @@ import java.util.ArrayList;
 class ByteUtils {
     private static ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
 
-    public static byte[] longToBytes(long x) {
-        buffer.putLong(0, x);
+    public static byte[] floatToBytes(float x) {
+        buffer.putFloat(0, x);
         return buffer.array();
     }
 
-    public static long bytesToLong(byte[] bytes) {
+    public static float bytesToFloat(byte[] bytes) {
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
-        return buffer.getLong();
+        return buffer.getFloat();
     }
 
     public static byte[] stringToBytes(String str) {
@@ -75,46 +75,50 @@ public class Main extends Activity {
         @Override
         protected void onProgressUpdate(String... progress) {
             // update found clients
-            statusText.setText(progress[0]);
+            if (progress[0].equals("status")){
+                statusText.setText(progress[1]);
+            } else if (progress[0].equals("command")) {
+                sendCommandText.setText(progress[1]);
+            }
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
-                publishProgress(scanDevices());
+                publishProgress("status", scanDevices());
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+//                }
+
+                // Test send command
+                // TODO: make helper functions like move_robot and rotate_robot
+                String string = "D" + (new Float(2)).toString() + "\0";
+                Log.i(TAG, "Sending " + string + " to arduino");
+                ArduinoController.write(
+                        ByteUtils.stringToBytes(string));
+                publishProgress("command", "D2");
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
-//                    e.printStackTrace();
+                    Log.i(TAG, "Thread interrupted!");
+                    statusText.setText("Thread interrupted");
+                    e.printStackTrace();
+                }
+                Log.i(TAG, "Sending R180 to arduino");
+                ArduinoController.write(
+                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\0"));
+                publishProgress("command", "R180");
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted again!");
+                    statusText.setText("Thread interrupted");
+                    e.printStackTrace();
                 }
 
-//                // Test send command
-//                // TODO: make helper functions like move_robot and rotate_robot
-//                Log.i(TAG, "Sending D100 to arduino");
-//                ArduinoController.write(ByteUtils.concatenateByteArrays(
-//                        ByteUtils.stringToBytes("D"),
-//                        ByteUtils.longToBytes((long) 100)));
-//                sendCommandText.setText("D100");
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted!");
-//                    statusText.setText("Thread interrupted");
-//                    e.printStackTrace();
-//                }
-//                Log.i(TAG, "Sending D1000 to arduino");
-//                ArduinoController.write(ByteUtils.concatenateByteArrays(
-//                        ByteUtils.stringToBytes("D"),
-//                        ByteUtils.longToBytes((long) 1000)));
-//                sendCommandText.setText("D1000");
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted again!");
-//                    statusText.setText("Thread interrupted");
-//                    e.printStackTrace();
-//                }
             }
             return null;
         }
