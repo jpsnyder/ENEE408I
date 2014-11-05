@@ -138,7 +138,7 @@ public class ArduinoController {
             // set to send over 8 bits
             arduinoPort.setParameters(115200, UsbSerialPort.DATABITS_8,
                     UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            arduinoPort.close();
+            //arduinoPort.close();
         } catch (IOException e) {
             String result = "Error opening device: " + e.getMessage();
             Log.i(TAG, result);
