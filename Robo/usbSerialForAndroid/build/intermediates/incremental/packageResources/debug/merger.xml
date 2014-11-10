@@ -2,12 +2,12 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialForAndroid\src\main\res" />
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialForAndroid\build\generated\res\rs\debug" />
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialForAndroid\build\generated\res\generated\debug" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialForAndroid/src/main/res" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialForAndroid/build/generated/res/rs/debug" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialForAndroid/build/generated/res/generated/debug" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialForAndroid\src\debug\res" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialForAndroid/src/debug/res" />
     </dataSet>
 
 </merger>

@@ -2,10 +2,10 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\src\main\assets" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/src/main/assets" />
     </dataSet>
     <dataSet config="release" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\src\release\assets" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/src/release/assets" />
     </dataSet>
 
 </merger>

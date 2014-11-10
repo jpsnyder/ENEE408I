@@ -2,9 +2,9 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\res" >
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/res" >
             <file
-                path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\res\values\attrs.xml"
+                path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/res/values/attrs.xml"
                 qualifiers="" >
                 <declare-styleable name="CameraBridgeViewBase" >
                     <attr
@@ -26,11 +26,11 @@
                 </declare-styleable>
             </file>
         </source>
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\build\generated\res\rs\debug" />
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\build\generated\res\generated\debug" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/build/generated/res/rs/debug" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/build/generated/res/generated/debug" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\libraries\opencv\src\debug\res" />
+        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/src/debug/res" />
     </dataSet>
 
 </merger>
