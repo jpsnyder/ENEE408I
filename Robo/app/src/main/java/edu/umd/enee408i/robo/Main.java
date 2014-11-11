@@ -24,40 +24,6 @@ import java.util.ArrayList;
 
 //import org.opencv.core;
 
-class ByteUtils {
-    private static ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
-
-    public static byte[] floatToBytes(float x) {
-        buffer.putFloat(0, x);
-        return buffer.array();
-    }
-
-    public static float bytesToFloat(byte[] bytes) {
-        buffer.put(bytes, 0, bytes.length);
-        buffer.flip();//need flip
-        return buffer.getFloat();
-    }
-
-    public static byte[] stringToBytes(String str) {
-        byte[] b = new byte[str.length()];
-        for (int i = 0; i < b.length; i++) {
-            b[i] = (byte) str.charAt(i);
-        }
-        return b;
-    }
-
-    public static String bytesToString(byte[] bytes){
-        return new String(bytes);
-    }
-
-    public static byte[] concatenateByteArrays(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
-}
-
 public class Main extends Activity {
 
     public static final String TAG = "ROBO";
@@ -95,11 +61,13 @@ public class Main extends Activity {
 
                 // Test send command
                 // TODO: make helper functions like move_robot and rotate_robot
-                String string = "D" + (new Float(2)).toString() + "\r\n";
-                Log.i(TAG, "Sending " + string + " to arduino");
-                ArduinoController.write(ByteUtils.stringToBytes(string)
-                       );
+//                String string = "D" + (new Float(2)).toString() + "\r\n";
+//                ArduinoController.write(ByteUtils.stringToBytes(string)
+//                       );
+                ArduinoController.move_robot(new Float(2), false);
                 publishProgress("command", "D2");
+
+                // sleeping
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -108,9 +76,12 @@ public class Main extends Activity {
                     e.printStackTrace();
                 }
                 Log.i(TAG, "Sending R180 to arduino");
-                ArduinoController.write(
-                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\r\n"));
+//                ArduinoController.write(
+//                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\r\n"));
+                ArduinoController.rotate_robot(new Float(180), false);
                 publishProgress("command", "R180");
+
+                // sleeping
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {

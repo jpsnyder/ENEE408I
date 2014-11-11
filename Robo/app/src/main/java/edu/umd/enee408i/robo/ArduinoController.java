@@ -14,12 +14,46 @@ import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+class ByteUtils {
+    private static ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE);
+
+    public static byte[] floatToBytes(float x) {
+        buffer.putFloat(0, x);
+        return buffer.array();
+    }
+
+    public static float bytesToFloat(byte[] bytes) {
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip();//need flip
+        return buffer.getFloat();
+    }
+
+    public static byte[] stringToBytes(String str) {
+        byte[] b = new byte[str.length()];
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (byte) str.charAt(i);
+        }
+        return b;
+    }
+
+    public static String bytesToString(byte[] bytes){
+        return new String(bytes);
+    }
+
+    public static byte[] concatenateByteArrays(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
+    }
+}
 
 public class ArduinoController {
 
@@ -66,6 +100,7 @@ public class ArduinoController {
         // TODO: parse data first? call another function?
 //        String stringData = new String(data);
 //        retrievedData.add(stringData);
+        retrievedData.add(ByteUtils.bytesToString(data));
         mainActivity.receivedData(data);
 //        final String message = "Read " + data.length + " bytes: \n"
 //                + HexDump.dumpHexString(data) + "\n\n";
@@ -103,6 +138,26 @@ public class ArduinoController {
         return bytesWritten;
     }
 
+    public static void move_robot(Float distance, boolean wait){
+        String string = "D" + distance.toString() + "\r\n";
+        retrievedData = null;
+        write(ByteUtils.stringToBytes(string));
+        if (wait){
+            // wait for acknowledgment from arduino
+            while(retrievedData.isEmpty());
+        }
+    }
+
+    public static void rotate_robot(Float angle, boolean wait){
+        String string = "R" + angle.toString() + "\r\n";
+        retrievedData = null;
+        write(ByteUtils.stringToBytes(string));
+        if (wait){
+            // wait for acknowledgment from arduino
+            while(retrievedData.isEmpty());
+        }
+    }
+
     public static String start(Context context){
         Log.i(TAG, "Starting ArduinoController");
         // Find all available drivers from attached devices
@@ -138,7 +193,6 @@ public class ArduinoController {
             // set to send over 8 bits
             arduinoPort.setParameters(115200, UsbSerialPort.DATABITS_8,
                     UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-            //arduinoPort.close();
         } catch (IOException e) {
             String result = "Error opening device: " + e.getMessage();
             Log.i(TAG, result);
