@@ -55,13 +55,16 @@ public class Main extends Activity {
             isRunning = true;
             while(isRunning) {
                 Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
-                publishProgress("status", "OpenCV Mat: ");
+                Log.i(TAG, "Success creating m");
+                publishProgress("status", "OpenCV Mat: " + m.toString());
+                Log.i(TAG, "Published creating m");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     Log.i(TAG, "Thread interrupted!");
                     e.printStackTrace();
                 }
+                Log.i(TAG, "done waiting!");
                 //Mat mr1 = m.row(1);
                 //mr1.setTo(new Scalar(1));
                 //Mat mc5 = m.col(5);

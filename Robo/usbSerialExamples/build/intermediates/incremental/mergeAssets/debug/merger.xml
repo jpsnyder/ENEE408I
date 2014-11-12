@@ -2,13 +2,13 @@
 <merger version="2" >
 
     <dataSet config="0.2.0-SNAPSHOT" >
-        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialExamples/build/intermediates/exploded-aar/com.hoho.android/usbSerialForAndroid/0.2.0-SNAPSHOT/assets" />
+        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialExamples\build\intermediates\exploded-aar\com.hoho.android\usbSerialForAndroid\0.2.0-SNAPSHOT\assets" />
     </dataSet>
     <dataSet config="main" >
-        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialExamples/src/main/assets" />
+        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialExamples\src\main\assets" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialExamples/src/debug/assets" />
+        <source path="C:\Users\Lab Admin\Documents\GitHub\ENEE408I\Robo\usbSerialExamples\src\debug\assets" />
     </dataSet>
 
 </merger>
