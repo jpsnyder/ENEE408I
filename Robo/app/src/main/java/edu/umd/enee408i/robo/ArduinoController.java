@@ -100,7 +100,11 @@ public class ArduinoController {
         // TODO: parse data first? call another function?
 //        String stringData = new String(data);
 //        retrievedData.add(stringData);
+        if (retrievedData == null){
+            retrievedData = new LinkedList<String>();
+        }
         retrievedData.add(ByteUtils.bytesToString(data));
+
         mainActivity.receivedData(data);
 //        final String message = "Read " + data.length + " bytes: \n"
 //                + HexDump.dumpHexString(data) + "\n\n";
@@ -140,7 +144,7 @@ public class ArduinoController {
 
     public static void move_robot(Float distance, boolean wait){
         String string = "D" + distance.toString() + "\r\n";
-        retrievedData = null;
+        retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
             // wait for acknowledgment from arduino
@@ -150,7 +154,7 @@ public class ArduinoController {
 
     public static void rotate_robot(Float angle, boolean wait){
         String string = "R" + angle.toString() + "\r\n";
-        retrievedData = null;
+        retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
             // wait for acknowledgment from arduino

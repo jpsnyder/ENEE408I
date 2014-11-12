@@ -19,10 +19,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-
-import org.opencv.core.*;
 
 public class Main extends Activity {
 
@@ -52,7 +54,23 @@ public class Main extends Activity {
         protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
-                publishProgress("status", scanDevices());
+                Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
+                publishProgress("status", "OpenCV Mat: ");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted!");
+                    e.printStackTrace();
+                }
+                //Mat mr1 = m.row(1);
+                //mr1.setTo(new Scalar(1));
+                //Mat mc5 = m.col(5);
+                //mc5.setTo(new Scalar(5));
+                //publishProgress("status", "OpenCV Mat data:\n" + m.dump());
+
+
+
+//                publishProgress("status", scanDevices());
 //                try {
 //                    Thread.sleep(3000);
 //                } catch (InterruptedException e) {
@@ -64,29 +82,22 @@ public class Main extends Activity {
 //                String string = "D" + (new Float(2)).toString() + "\r\n";
 //                ArduinoController.write(ByteUtils.stringToBytes(string)
 //                       );
-                publishProgress("command", "D2");
-                ArduinoController.move_robot(new Float(2), true);
+//                publishProgress("command", "D2");
+//                ArduinoController.move_robot(new Float(2), true);
 
                 // sleeping
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted!");
-//                    statusText.setText("Thread interrupted");
-//                    e.printStackTrace();
-//                }
-                Log.i(TAG, "Sending R180 to arduino");
+
+//                Log.i(TAG, "Sending R180 to arduino");
 //                ArduinoController.write(
 //                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\r\n"));
-                publishProgress("command", "R180");
-                ArduinoController.rotate_robot(new Float(180), true);
+//                publishProgress("command", "R180");
+//                ArduinoController.rotate_robot(new Float(180), true);
 
                 // sleeping
 //                try {
 //                    Thread.sleep(5000);
 //                } catch (InterruptedException e) {
 //                    Log.i(TAG, "Thread interrupted again!");
-//                    statusText.setText("Thread interrupted");
 //                    e.printStackTrace();
 //                }
 

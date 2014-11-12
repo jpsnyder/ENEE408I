@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- From: file:/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/libraries/opencv/res/values/attrs.xml -->
+    <!-- From: file:/C:/Users/Lab%20Admin/Documents/GitHub/ENEE408I/Robo/libraries/opencv/res/values/attrs.xml -->
     <eat-comment />
 
     <declare-styleable name="CameraBridgeViewBase">
