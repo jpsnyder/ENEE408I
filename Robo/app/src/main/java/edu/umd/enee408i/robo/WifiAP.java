@@ -54,7 +54,8 @@ public class WifiAP extends Activity {
         }
 
         boolean wifiApIsOn = getWifiAPState() == WIFI_AP_STATE_ENABLED || getWifiAPState() == WIFI_AP_STATE_ENABLING;
-        new SetWifiAPTask(!wifiApIsOn, false, context).execute();
+        // TODO: change true back to false if becomes problem
+        new SetWifiAPTask(!wifiApIsOn, true, context).execute();
     }
 
     /**

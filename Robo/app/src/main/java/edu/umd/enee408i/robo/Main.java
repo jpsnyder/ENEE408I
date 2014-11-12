@@ -22,7 +22,7 @@ import android.widget.TextView;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-//import org.opencv.core;
+import org.opencv.core.*;
 
 public class Main extends Activity {
 
@@ -64,31 +64,31 @@ public class Main extends Activity {
 //                String string = "D" + (new Float(2)).toString() + "\r\n";
 //                ArduinoController.write(ByteUtils.stringToBytes(string)
 //                       );
-                ArduinoController.move_robot(new Float(2), false);
                 publishProgress("command", "D2");
+                ArduinoController.move_robot(new Float(2), true);
 
                 // sleeping
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted!");
-                    statusText.setText("Thread interrupted");
-                    e.printStackTrace();
-                }
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted!");
+//                    statusText.setText("Thread interrupted");
+//                    e.printStackTrace();
+//                }
                 Log.i(TAG, "Sending R180 to arduino");
 //                ArduinoController.write(
 //                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\r\n"));
-                ArduinoController.rotate_robot(new Float(180), false);
                 publishProgress("command", "R180");
+                ArduinoController.rotate_robot(new Float(180), true);
 
                 // sleeping
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    statusText.setText("Thread interrupted");
-                    e.printStackTrace();
-                }
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    statusText.setText("Thread interrupted");
+//                    e.printStackTrace();
+//                }
 
             }
             return null;
