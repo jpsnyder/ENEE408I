@@ -1,11 +1,21 @@
 Jon:
-	- research how to communicate android with arduino using USB
+	- Create ArduinoController interface that sends and receives data
+		- send to arduino commands
+			- move x distance at y speed
+			- turn r radians cw
+			- allow for future commands
+		- receive from arduino
+			- i moved z distance
+			- my ping sensors are (l cm, r cm)
 
 Ryan:
-	- 
+	- door detection
+	- intial setup of opencv algroithm
 
 Eashan:
-	- 
+	- motor encoders
+	- create commands that can handle usb communcation as described in Jon's tasks
+
 
 
 

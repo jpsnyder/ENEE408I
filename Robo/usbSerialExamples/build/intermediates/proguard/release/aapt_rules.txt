@@ -1,0 +1,6 @@
+# view AndroidManifest.xml #generated:16
+-keep class com.hoho.android.usbserial.examples.DeviceListActivity { <init>(...); }
+
+# view AndroidManifest.xml #generated:34
+-keep class com.hoho.android.usbserial.examples.SerialConsoleActivity { <init>(...); }
+
