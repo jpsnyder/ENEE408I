@@ -15,20 +15,21 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="COMMAND"
         android:id="@+id/sendCommandText"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="[Status]"
         android:id="@+id/statusText"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/btnWifiToggle" />
 
     <Button
         android:id="@+id/btnWifiToggle"
@@ -36,7 +37,27 @@
         android:layout_height="wrap_content"
         android:text="Toggle WifiAP"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="83dp" />
+        android:layout_alignRight="@+id/statusText"
+        android:layout_alignEnd="@+id/statusText" />
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView"
+        android:layout_alignTop="@+id/statusText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <org.opencv.android.JavaCameraView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cameraView"
+        android:layout_toStartOf="@+id/btnWifiToggle"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/btnWifiToggle"
+        android:layout_alignEnd="@+id/btnWifiToggle"
+        android:layout_toRightOf="@+id/scrollView"
+        android:layout_toEndOf="@+id/scrollView"
+        android:layout_above="@+id/statusText" />
 
 </RelativeLayout>

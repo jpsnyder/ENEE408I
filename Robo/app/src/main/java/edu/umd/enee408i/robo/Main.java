@@ -1,5 +1,6 @@
 package edu.umd.enee408i.robo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,10 +16,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -26,19 +30,28 @@ import org.opencv.core.Scalar;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class Main extends Activity {
+public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener{
+    // initialize static use of openCV (no using opencv manager)
+    //   - I know this is bad but WHO CARES!!
+    //  from: http://stackoverflow.com/questions/20259309/how-to-integrate-opencv-manager-in-android-app
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+    }
 
     public static final String TAG = "ROBO";
 
     // Mapping Thread, Run all functions in here
+    @SuppressLint("NewApi")
     class MappingTask extends AsyncTask<Void, String, Void>{
 
         boolean isRunning;
 
         // called when ArduinoController gets data from arduino
-        public void receivedData(byte[] data){
-            statusText.setText("Received: " + new String(data));
-        }
+//        public void receivedData(byte[] data){
+//            statusText.setText("Received: " + new String(data));
+//        }
 
         @Override
         protected void onProgressUpdate(String... progress) {
@@ -50,12 +63,13 @@ public class Main extends Activity {
             }
         }
 
+        @SuppressLint("NewApi")
         @Override
         protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
                 Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
-                publishProgress("status", "OpenCV Mat: ");
+                publishProgress("status", "OpenCV Mat: " + m);
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -110,6 +124,10 @@ public class Main extends Activity {
     TextView sendCommandText;  // Center text that displays command being sent to arduino
     MappingTask mappingTask = new MappingTask();
 
+    // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
+    protected CameraBridgeViewBase cameraPreview;
+    protected Mat mRgba;
+
     // Wifi stuff
     boolean wasAPEnabled = false;
     static WifiAP wifiAP;
@@ -148,6 +166,9 @@ public class Main extends Activity {
         sendCommandText = (TextView) findViewById(R.id.sendCommandText);
         statusText = (TextView) findViewById(R.id.statusText);
 
+        cameraPreview = (CameraBridgeViewBase) findViewById(R.id.cameraView);
+        cameraPreview.setCvCameraViewListener(this);
+
         // Wifi stuff
         btnWifiToggle = (Button) findViewById(R.id.btnWifiToggle);
         wifiAP = new WifiAP();
@@ -161,6 +182,34 @@ public class Main extends Activity {
         Log.i(TAG, "Finished onCreate");
     }
 
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+        // TODO Auto-generated method stub
+        mRgba =  new Mat(height, width, CvType.CV_8UC4);
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+        // TODO Auto-generated method stub
+        mRgba.release();
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        // TODO Auto-generated method stub
+        mRgba = inputFrame.rgba();
+
+        return mRgba;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @SuppressLint("NewApi")
     @Override
     protected void onPause() {
         super.onPause();
@@ -184,6 +233,7 @@ public class Main extends Activity {
         updateButtonStatus();
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected void onResume(){
         super.onResume();
@@ -219,6 +269,7 @@ public class Main extends Activity {
     // Called when arduino controller receives data
     public void receivedData(byte[] data){
         Log.i(TAG, "Recieved from Arduino: " + data);
-        mappingTask.receivedData(data);  // send over to mapping thread
+        statusText.append("Received: " + data);
+//        mappingTask.receivedData(data);  // send over to mapping thread
     }
 }
