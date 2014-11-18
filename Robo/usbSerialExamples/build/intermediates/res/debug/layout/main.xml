@@ -47,4 +47,4 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/separator" />
 
-</RelativeLayout><!-- From: file:/home/jon/Dropbox/Maryland/ENEE408I/dev/Robo/usbSerialExamples/src/main/res/layout/main.xml -->
+</RelativeLayout><!-- From: file:/C:/Users/Lab%20Admin/Documents/GitHub/ENEE408I/Robo/usbSerialExamples/src/main/res/layout/main.xml -->
