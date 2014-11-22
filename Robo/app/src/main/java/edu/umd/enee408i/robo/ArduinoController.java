@@ -1,7 +1,9 @@
 package edu.umd.enee408i.robo;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.SystemClock;
@@ -62,9 +64,6 @@ public class ArduinoController {
     private static UsbSerialPort arduinoPort = null;  // arduino port
     private static UsbManager usbManager = null;
 
-    // keep track of our main activity
-    private static Main mainActivity = null;
-
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     private static SerialInputOutputManager serialIOManager;
 
@@ -81,6 +80,7 @@ public class ArduinoController {
 
                 @Override
                 public void onNewData(final byte[] data) {
+                    Log.i(TAG, "onNewData has been called!!!");
                     updateReceivedData(data);
 //                    runOnUiThread(new Runnable() {
 //                        @Override
@@ -100,17 +100,11 @@ public class ArduinoController {
         // TODO: parse data first? call another function?
 //        String stringData = new String(data);
 //        retrievedData.add(stringData);
+        Log.i(TAG, "Received Data: " + ByteUtils.bytesToString(data));
         if (retrievedData == null){
             retrievedData = new LinkedList<String>();
         }
         retrievedData.add(ByteUtils.bytesToString(data));
-
-        mainActivity.receivedData(data);
-//        final String message = "Read " + data.length + " bytes: \n"
-//                + HexDump.dumpHexString(data) + "\n\n";
-//        sendCommandText.setText(message);  // display received data
-//        mDumpTextView.append(message);
-//        mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
     }
 
     private static void stopIoManager() {
@@ -131,14 +125,17 @@ public class ArduinoController {
 
 
     public static int write(byte[] data){
-        if (arduinoPort == null)
+        if (arduinoPort == null) {
+            Log.i(TAG, "write failed");
             return 0;
+        }
         int bytesWritten;
         try {
             bytesWritten = arduinoPort.write(data, 1000);
         } catch (IOException e) {
             return 0;
         }
+        Log.i(TAG, "wrote " + bytesWritten + " bytes");
         return bytesWritten;
     }
 
@@ -147,8 +144,10 @@ public class ArduinoController {
         retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
+            Log.i(TAG, "move_robot is waiting....");
             // wait for acknowledgment from arduino
-            while(retrievedData.isEmpty());
+            while(!retrievedData.contains("ACK"));
+            Log.i(TAG, "move_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
 
@@ -157,8 +156,10 @@ public class ArduinoController {
         retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
+            Log.i(TAG, "rotate_robot is waiting....");
             // wait for acknowledgment from arduino
-            while(retrievedData.isEmpty());
+            while(!retrievedData.contains("ACK"));
+            Log.i(TAG, "rotate_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
 
@@ -167,7 +168,6 @@ public class ArduinoController {
         // Find all available drivers from attached devices
         if (usbManager == null)
             usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        mainActivity = (Main) context;
 
         Log.i(TAG, "Listing Drivers");
         SystemClock.sleep(1000);
@@ -185,8 +185,9 @@ public class ArduinoController {
             return "Arduino Not Found!";
         }
 
-
-        UsbDeviceConnection connection = usbManager.openDevice(arduinoPort.getDriver().getDevice());
+        UsbDevice device = arduinoPort.getDriver().getDevice();
+        Log.i(TAG, "Connected to productID: " + device.getProductId());
+        UsbDeviceConnection connection = usbManager.openDevice(device);
         if (connection == null){
             Log.i(TAG, "Could not open device");
             return "Opening device failed!";

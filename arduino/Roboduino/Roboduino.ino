@@ -67,14 +67,16 @@ void loop() {
     //msg[5] = '/0';
     switch ((char) msg[0]) {
       case 'D':
-        SerialUSB.println(atoi((const char*) (msg + 1)));
         //Serial.println((int)*(msg+1)-'0');
         move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        // send acknowlegement
+        SerialUSB.write("ACK");
         //move_robot(LOW_SPEED, ((int) *(msg+1)-'0'));
         delay(50);
         break;
       case 'R':
         rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        SerialUSB.write("ACK");
         delay(50);
         break;
     }
@@ -93,33 +95,29 @@ void loop() {
 //Serial.print(encoderRPos);
 //Serial.println();
 
-int report_distance(unsigned long distance) {
-  if (SerialUSB.print("D")) {
-    SerialUSB.print(distance);
-  }
-}
+//int report_distance(unsigned long distance) {
+//  if (SerialUSB.print("D")) {
+//    SerialUSB.print(distance);
+//  }
+//}
+//
+//int report_angle(unsigned long angle) {
+//  if (SerialUSB.print("R")) {
+//    SerialUSB.print(angle);
+//  }
+//}
 
-int report_angle(unsigned long angle) {
-  if (SerialUSB.print("R")) {
-    SerialUSB.print(angle);
-  }
-}
-
-int follow_instructions() {
-  // read instructions
-  byte buff[50];
-  int size_instructions = sizeof(char) + sizeof(unsigned long);
-  if (SerialUSB.readBytes(buff, size_instructions) == 0)
-    return 0;
-  if ((char) buff[0] == 'D')
-    move_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
-  if ((char) buff[0] == 'A')
-    rotate_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
-}
-
-int send_to_android(char *string) {
-  return SerialUSB.write(string);
-}
+//int follow_instructions() {
+//  // read instructions
+//  byte buff[50];
+//  int size_instructions = sizeof(char) + sizeof(unsigned long);
+//  if (SerialUSB.readBytes(buff, size_instructions) == 0)
+//    return 0;
+//  if ((char) buff[0] == 'D')
+//    move_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
+//  if ((char) buff[0] == 'A')
+//    rotate_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
+//}
 
 void rotate_robot(int wheel_speed, float angle) {
   //counter-clockwise is positive

@@ -21,7 +21,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -34,11 +36,13 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     // initialize static use of openCV (no using opencv manager)
     //   - I know this is bad but WHO CARES!!
     //  from: http://stackoverflow.com/questions/20259309/how-to-integrate-opencv-manager-in-android-app
-    static {
-        if (!OpenCVLoader.initDebug()) {
-            // Handle initialization error
-        }
-    }
+//    static {
+//        if (!OpenCVLoader.initDebug()) {
+//            // Handle initialization error
+//        }
+//    }
+
+
 
     public static final String TAG = "ROBO";
 
@@ -68,25 +72,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
-                Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
-                Log.i(TAG, "Success creating m");
-                publishProgress("status", "OpenCV Mat: " + m.toString());
-                Log.i(TAG, "Published creating m");
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted!");
-                    e.printStackTrace();
-                }
-                Log.i(TAG, "done waiting!");
-                //Mat mr1 = m.row(1);
-                //mr1.setTo(new Scalar(1));
-                //Mat mc5 = m.col(5);
-                //mc5.setTo(new Scalar(5));
-                //publishProgress("status", "OpenCV Mat data:\n" + m.dump());
-
-
-
 //                publishProgress("status", scanDevices());
 //                try {
 //                    Thread.sleep(3000);
@@ -94,29 +79,23 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 ////                    e.printStackTrace();
 //                }
 
-                // Test send command
-                // TODO: make helper functions like move_robot and rotate_robot
-//                String string = "D" + (new Float(2)).toString() + "\r\n";
-//                ArduinoController.write(ByteUtils.stringToBytes(string)
-//                       );
-//                publishProgress("command", "D2");
-//                ArduinoController.move_robot(new Float(2), true);
+                Log.i(TAG, "Sending R10 to arduino");
+                publishProgress("command", "R10");
+                ArduinoController.rotate_robot(new Float(180), true);
 
                 // sleeping
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted again!");
+                    e.printStackTrace();
+                }
 
-//                Log.i(TAG, "Sending R180 to arduino");
-//                ArduinoController.write(
-//                        ByteUtils.stringToBytes("R" + (new Float(180)).toString() + "\r\n"));
-//                publishProgress("command", "R180");
-//                ArduinoController.rotate_robot(new Float(180), true);
+                Log.i(TAG, "Sending D1 to arduino");
+                publishProgress("command", "D1");
+                ArduinoController.move_robot(new Float(1), true);
 
-                // sleeping
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted again!");
-//                    e.printStackTrace();
-//                }
+
 
             }
             return null;
@@ -130,6 +109,24 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
     protected CameraBridgeViewBase cameraPreview;
     protected Mat mRgba;
+    protected BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i(TAG, "OpenCV loaded successfully");
+//                    mOpenCvCameraView.enableView();
+//                    mOpenCvCameraView.setOnTouchListener(ColorRegionDetectionActivity.this);
+                    cameraPreview.enableView();
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
 
     // Wifi stuff
     boolean wasAPEnabled = false;
@@ -185,19 +182,16 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         Log.i(TAG, "Finished onCreate");
     }
 
+    // Camera stuff
     @Override
     public void onCameraViewStarted(int width, int height) {
-        // TODO Auto-generated method stub
         mRgba =  new Mat(height, width, CvType.CV_8UC4);
     }
-
     @Override
     public void onCameraViewStopped() {
-        // TODO Auto-generated method stub
         mRgba.release();
 
     }
-
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         // TODO Auto-generated method stub
@@ -205,12 +199,12 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
         return mRgba;
     }
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         // TODO Auto-generated method stub
         return false;
     }
+
 
     @SuppressLint("NewApi")
     @Override
@@ -223,7 +217,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-        finish();
 
         // Wifi stuff
         boolean wifiApIsOn = wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLED || wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLING;
@@ -234,6 +227,13 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             wasAPEnabled = false;
         }
         updateButtonStatus();
+
+        // Camera stuff
+        if(cameraPreview != null){
+            cameraPreview.disableView();
+        }
+
+        finish();
     }
 
     @SuppressLint("NewApi")
@@ -243,6 +243,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         statusText.setText(ArduinoController.start(this));
         Log.i(TAG, "Starting mappingThread.");
         mappingTask.execute();
+
+        // Camera stuff
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 
         // Wifi stuff
         if (wasAPEnabled) {
@@ -272,7 +275,5 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     // Called when arduino controller receives data
     public void receivedData(byte[] data){
         Log.i(TAG, "Recieved from Arduino: " + data);
-        statusText.append("Received: " + data);
-//        mappingTask.receivedData(data);  // send over to mapping thread
     }
 }
