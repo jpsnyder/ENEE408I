@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
@@ -19,30 +21,25 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener{
-    // initialize static use of openCV (no using opencv manager)
-    //   - I know this is bad but WHO CARES!!
-    //  from: http://stackoverflow.com/questions/20259309/how-to-integrate-opencv-manager-in-android-app
-//    static {
-//        if (!OpenCVLoader.initDebug()) {
-//            // Handle initialization error
-//        }
-//    }
-
-
 
     public static final String TAG = "ROBO";
 
@@ -64,6 +61,12 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 statusText.setText(progress[1]);
             } else if (progress[0].equals("command")) {
                 sendCommandText.setText(progress[1]);
+            } else if (progress[0].equals("camera")){
+                assert(cameraPreview2Mat != null);
+                Mat m = cameraPreview2Mat;
+                Bitmap bm = Bitmap.createBitmap(m.cols(), m.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(m, bm);
+                cameraPreview2.setImageBitmap(bm);
             }
         }
 
@@ -79,26 +82,64 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 ////                    e.printStackTrace();
 //                }
 
-                Log.i(TAG, "Dumping mRgba");
                 while(mRgba == null);
-                publishProgress("status", mRgba.dump());
+                // create new greyscale image
+                Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
+                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
+                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
+                Mat lines = new Mat();  // mat to draw lines
+                int threshold = 10;
+                int minLineSize = 50;
+                int lineGap = 20;
 
-                Log.i(TAG, "Sending R10 to arduino");
-//                publishProgress("command", "R10");
-                ArduinoController.rotate_robot(new Float(180), true);
+                // magic
+                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
 
+                // draw the lines onto lines mat
+                for (int x = 0; x < lines.cols(); x++)
+                {
+                    double[] vec = lines.get(0, x);
+                    double x1 = vec[0],
+                            y1 = vec[1],
+                            x2 = vec[2],
+                            y2 = vec[3];
+                    Point start = new Point(x1, y1);
+                    Point end = new Point(x2, y2);
 
-                // sleeping
+//                    draw onto our camera
+                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
+
+                }
+
+                cameraPreview2Mat = thresholdImage;
+                publishProgress("camera");
+
+                // sleeping before going again
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Log.i(TAG, "Thread interrupted again!");
                     e.printStackTrace();
                 }
 
-                Log.i(TAG, "Sending D1 to arduino");
-                publishProgress("command", "D1");
-                ArduinoController.move_robot(new Float(1), true);
+//                publishProgress("status", mRgba.dump());
+
+//                Log.i(TAG, "Sending R10 to arduino");
+////                publishProgress("command", "R10");
+//                ArduinoController.rotate_robot(new Float(180), true);
+//
+//
+//                // sleeping
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    e.printStackTrace();
+//                }
+//
+//                Log.i(TAG, "Sending D1 to arduino");
+//                publishProgress("command", "D1");
+//                ArduinoController.move_robot(new Float(1), true);
 
 
 
@@ -113,7 +154,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
     // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
     protected CameraBridgeViewBase cameraPreview;
+    protected ImageView cameraPreview2;
     public Mat mRgba;
+    public Mat cameraPreview2Mat;
     protected BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -132,6 +175,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         }
     };
+    
 
     // Wifi stuff
     boolean wasAPEnabled = false;
@@ -173,6 +217,8 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
         cameraPreview = (CameraBridgeViewBase) findViewById(R.id.cameraView);
         cameraPreview.setCvCameraViewListener(this);
+        // test camera
+        cameraPreview2 = (ImageView) findViewById(R.id.cameraView2);
 
         // Wifi stuff
         btnWifiToggle = (Button) findViewById(R.id.btnWifiToggle);
@@ -190,7 +236,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     // Camera stuff
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mRgba =  new Mat(height, width, CvType.CV_8UC4);
+        mRgba =  new Mat(height, width, CvType.CV_8UC3);
     }
     @Override
     public void onCameraViewStopped() {
@@ -199,7 +245,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     }
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        // TODO Auto-generated method stub
         mRgba = inputFrame.rgba();
 
         return mRgba;
