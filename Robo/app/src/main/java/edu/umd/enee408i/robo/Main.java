@@ -79,9 +79,14 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 ////                    e.printStackTrace();
 //                }
 
+                Log.i(TAG, "Dumping mRgba");
+                while(mRgba == null);
+                publishProgress("status", mRgba.dump());
+
                 Log.i(TAG, "Sending R10 to arduino");
-                publishProgress("command", "R10");
+//                publishProgress("command", "R10");
                 ArduinoController.rotate_robot(new Float(180), true);
+
 
                 // sleeping
                 try {
@@ -108,7 +113,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
     // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
     protected CameraBridgeViewBase cameraPreview;
-    protected Mat mRgba;
+    public Mat mRgba;
     protected BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
