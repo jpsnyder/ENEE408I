@@ -11,8 +11,8 @@
 
 
     <TextView
-        android:layout_width="93dp"
-        android:layout_height="35dp"
+        android:layout_width="732dp"
+        android:layout_height="57dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="[Status]"
         android:id="@+id/statusText"
@@ -22,8 +22,8 @@
         android:layout_alignParentEnd="true"
         android:layout_above="@+id/btnWifiToggle"
         android:layout_gravity="center_vertical"
-        android:layout_x="26dp"
-        android:layout_y="200dp" />
+        android:layout_x="33dp"
+        android:layout_y="313dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -35,8 +35,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_gravity="bottom"
-        android:layout_x="15dp"
-        android:layout_y="267dp" />
+        android:layout_x="71dp"
+        android:layout_y="402dp" />
 
     <ScrollView
         android:layout_width="wrap_content"
@@ -47,8 +47,8 @@
         android:layout_alignParentStart="true" />
 
     <org.opencv.android.JavaCameraView
-        android:layout_width="237dp"
-        android:layout_height="171dp"
+        android:layout_width="331dp"
+        android:layout_height="261dp"
         android:id="@+id/cameraView"
         android:layout_toStartOf="@+id/btnWifiToggle"
         android:layout_alignParentTop="true"
@@ -68,14 +68,47 @@
         android:layout_alignEnd="@+id/statusText"
         android:layout_gravity="bottom"
         android:layout_weight="0.63"
-        android:layout_x="418dp"
-        android:layout_y="240dp" />
+        android:layout_x="603dp"
+        android:layout_y="385dp" />
 
     <ImageView
-        android:layout_width="188dp"
-        android:layout_height="188dp"
+        android:layout_width="286dp"
+        android:layout_height="286dp"
         android:id="@+id/cameraView2"
-        android:layout_x="325dp"
-        android:layout_y="0dp" />
+        android:layout_x="397dp"
+        android:layout_y="-3dp" />
+
+    <EditText
+        android:layout_width="163dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText"
+        android:layout_x="710dp"
+        android:layout_y="25dp"
+        android:hint="Threshold" />
+
+    <EditText
+        android:layout_width="163dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText2"
+        android:layout_x="710dp"
+        android:layout_y="80dp"
+        android:hint="minLineSize" />
+
+    <EditText
+        android:layout_width="163dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText3"
+        android:layout_x="710dp"
+        android:layout_y="145dp"
+        android:hint="lineGap" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="126dp"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:id="@+id/updateButton"
+        android:layout_x="710dp"
+        android:layout_y="208dp" />
 
 </AbsoluteLayout>

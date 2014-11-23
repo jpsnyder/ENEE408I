@@ -16,11 +16,13 @@ import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -82,15 +84,13 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 ////                    e.printStackTrace();
 //                }
 
+                // wait till camera is ready
                 while(mRgba == null);
                 // create new greyscale image
                 Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
                 Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
                 Mat lines = new Mat();  // mat to draw lines
-                int threshold = 10;
-                int minLineSize = 50;
-                int lineGap = 20;
 
                 // magic
                 Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
@@ -151,6 +151,10 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     TextView statusText;
     TextView sendCommandText;  // Center text that displays command being sent to arduino
     MappingTask mappingTask = new MappingTask();
+    EditText thresholdText;
+    EditText minLineSizeText;
+    EditText lineGapText;
+    Button updateBtn;
 
     // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
     protected CameraBridgeViewBase cameraPreview;
@@ -175,7 +179,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         }
     };
-    
+    int threshold = 10;
+    int minLineSize = 50;
+    int lineGap = 20;
 
     // Wifi stuff
     boolean wasAPEnabled = false;
@@ -227,6 +233,21 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         btnWifiToggle.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 wifiAP.toggleWiFiAP(wifi, Main.this);
+            }
+        });
+
+        // setup textboxes
+        thresholdText = (EditText) findViewById(R.id.editText);
+        minLineSizeText = (EditText) findViewById(R.id.editText2);
+        lineGapText = (EditText) findViewById(R.id.editText3);
+        updateBtn = (Button) findViewById(R.id.updateButton);
+        updateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // grab values from textbox
+                threshold = Integer.parseInt(thresholdText.getText().toString());
+                minLineSize = Integer.parseInt(minLineSizeText.getText().toString());
+                lineGap = Integer.parseInt(lineGapText.getText().toString());
             }
         });
 
