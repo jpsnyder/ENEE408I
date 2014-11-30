@@ -30,6 +30,8 @@ import android.hardware.usb.UsbRequest;
 import android.os.Build;
 import android.util.Log;
 
+import com.hoho.android.usbserial.util.HexDump;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -90,7 +92,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         public CdcAcmSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
-            mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            mEnableAsyncReads = false; // (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
         }
 
         @Override
@@ -159,23 +161,29 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         @Override
         public int read(byte[] dest, int timeoutMillis) throws IOException {
+            Log.i(TAG, "in read()");
             if (mEnableAsyncReads) {
               final UsbRequest request = new UsbRequest();
               try {
                 request.initialize(mConnection, mReadEndpoint);
                 final ByteBuffer buf = ByteBuffer.wrap(dest);
                 if (!request.queue(buf, dest.length)) {
+                  Log.d(TAG, "Error queueing request.");
                   throw new IOException("Error queueing request.");
                 }
-
+                Log.i(TAG, "Waiting for usbrequest");
+                // TODO: requestWait() wasn't working so I purposely turned off mEnableAsyncReads
                 final UsbRequest response = mConnection.requestWait();
+                Log.i(TAG, "Got request!");
                 if (response == null) {
+                  Log.d(TAG, "Null response");
                   throw new IOException("Null response");
                 }
 
                 final int nread = buf.position();
+                Log.i(TAG, "nread = " + nread);
                 if (nread > 0) {
-                  //Log.d(TAG, HexDump.dumpHexString(dest, 0, Math.min(32, dest.length)));
+                  Log.d(TAG, HexDump.dumpHexString(dest, 0, Math.min(32, dest.length)));
                   return nread;
                 } else {
                   return 0;
@@ -186,10 +194,15 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
             }
 
             final int numBytesRead;
+            Log.i(TAG, "Attempting to get mReadBufferLock");
             synchronized (mReadBufferLock) {
                 int readAmt = Math.min(dest.length, mReadBuffer.length);
                 numBytesRead = mConnection.bulkTransfer(mReadEndpoint, mReadBuffer, readAmt,
                         timeoutMillis);
+                Log.i(TAG, "numBytesRead = " + numBytesRead);
+                if (numBytesRead > 0){
+                    Log.i(TAG, "FUCK YEAH, WE READ SOME BYTES");
+                }
                 if (numBytesRead < 0) {
                     // This sucks: we get -1 on timeout, not 0 as preferred.
                     // We *should* use UsbRequest, except it has a bug/api oversight
@@ -197,6 +210,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                     // in response :\ -- http://b.android.com/28023
                     if (timeoutMillis == Integer.MAX_VALUE) {
                         // Hack: Special case "~infinite timeout" as an error.
+                        Log.i(TAG, "in special hack case :(");
                         return -1;
                     }
                     return 0;

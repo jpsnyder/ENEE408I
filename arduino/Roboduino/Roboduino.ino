@@ -60,7 +60,7 @@ void setup() {
 }
 
 void loop() {
-  //  move_robot(LOW_SPEED, 1);
+  // move_robot(LOW_SPEED, 1);
   //  delay(1000);
   char msg[6];
   if (SerialUSB.readBytes(msg, 1 + sizeof(int))) {
@@ -68,14 +68,17 @@ void loop() {
     switch ((char) msg[0]) {
       case 'D':
         //Serial.println((int)*(msg+1)-'0');
-        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        // TODO: temporarily stop movement because of low battery
+//        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        delay(1000);
         // send acknowlegement
         SerialUSB.write("ACK");
-        //move_robot(LOW_SPEED, ((int) *(msg+1)-'0'));
         delay(50);
         break;
       case 'R':
-        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        // TODO: temporarily stop movement because of low battery
+//        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        delay(1000);
         SerialUSB.write("ACK");
         delay(50);
         break;

@@ -40,7 +40,7 @@ public class SerialInputOutputManager implements Runnable {
     private static final String TAG = SerialInputOutputManager.class.getSimpleName();
     private static final boolean DEBUG = true;
 
-    private static final int READ_WAIT_MILLIS = 200;
+    private static final int READ_WAIT_MILLIS = 1000;
     private static final int BUFSIZ = 4096;
 
     private final UsbSerialPort mDriver;
@@ -124,6 +124,7 @@ public class SerialInputOutputManager implements Runnable {
      */
     @Override
     public void run() {
+        Log.i(TAG, "In run()");
         synchronized (this) {
             if (getState() != State.STOPPED) {
                 throw new IllegalStateException("Already running.");
@@ -138,7 +139,9 @@ public class SerialInputOutputManager implements Runnable {
                     Log.i(TAG, "Stopping mState=" + getState());
                     break;
                 }
+                Log.i(TAG, "Stepping...");
                 step();
+                Log.i(TAG, "Finished Stepping...");
             }
         } catch (Exception e) {
             Log.w(TAG, "Run ending due to exception: " + e.getMessage(), e);
@@ -156,7 +159,9 @@ public class SerialInputOutputManager implements Runnable {
 
     private void step() throws IOException {
         // Handle incoming data.
+        Log.i(TAG, "In step()");
         int len = mDriver.read(mReadBuffer.array(), READ_WAIT_MILLIS);
+        Log.i(TAG, "finished calling mDriver.read()");
         if (len > 0) {
             if (DEBUG) Log.d(TAG, "Read data len=" + len);
             final Listener listener = getListener();

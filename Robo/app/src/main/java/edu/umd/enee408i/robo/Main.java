@@ -51,11 +51,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
         boolean isRunning;
 
-        // called when ArduinoController gets data from arduino
-//        public void receivedData(byte[] data){
-//            statusText.setText("Received: " + new String(data));
-//        }
-
         @Override
         protected void onProgressUpdate(String... progress) {
             // update found clients
@@ -122,11 +117,11 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     e.printStackTrace();
                 }
 
-//                publishProgress("status", mRgba.dump());
 
-//                Log.i(TAG, "Sending R10 to arduino");
-////                publishProgress("command", "R10");
-//                ArduinoController.rotate_robot(new Float(180), true);
+                Log.i(TAG, "Sending R10 to arduino");
+                publishProgress("command", "R10");
+                ArduinoController.rotate_robot(new Float(180), true);
+                Log.i(TAG, "YAYY, IT WORKED!");
 //
 //
 //                // sleeping
@@ -312,8 +307,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     protected void onResume(){
         super.onResume();
         statusText.setText(ArduinoController.start(this));
-        Log.i(TAG, "Starting mappingThread.");
-        mappingTask.execute();
 
         // Camera stuff
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
@@ -325,6 +318,15 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         }
         updateButtonStatus();
+
+        // wait a few seconds for opencv to get its shit together before starting mapping task
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG, "Starting mappingThread.");
+        mappingTask.execute();
     }
 
     @Override

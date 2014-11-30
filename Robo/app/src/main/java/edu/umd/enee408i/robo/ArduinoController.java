@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -130,11 +131,13 @@ public class ArduinoController {
             return 0;
         }
         int bytesWritten;
-        try {
-            bytesWritten = arduinoPort.write(data, 1000);
-        } catch (IOException e) {
-            return 0;
-        }
+//        try {
+            bytesWritten = 8;
+            serialIOManager.writeAsync(data);
+//            bytesWritten = arduinoPort.write(data, 1000);
+//        } catch (IOException e) {
+//            return 0;
+//        }
         Log.i(TAG, "wrote " + bytesWritten + " bytes");
         return bytesWritten;
     }
