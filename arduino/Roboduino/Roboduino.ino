@@ -56,34 +56,36 @@ void setup() {
   pinMode(INB2, OUTPUT);
   pinMode(PWM2, OUTPUT);
   // debuging serial connection
-  SerialUSB.begin(152000);
+  Serial.begin(9600);
 }
 
 void loop() {
   // move_robot(LOW_SPEED, 1);
   //  delay(1000);
   char msg[6];
-  if (SerialUSB.readBytes(msg, 1 + sizeof(int))) {
-    //msg[5] = '/0';
-    switch ((char) msg[0]) {
-      case 'D':
-        //Serial.println((int)*(msg+1)-'0');
-        // TODO: temporarily stop movement because of low battery
-//        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        delay(1000);
-        // send acknowlegement
-        SerialUSB.write("ACK");
-        delay(50);
-        break;
-      case 'R':
-        // TODO: temporarily stop movement because of low battery
-//        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        delay(1000);
-        SerialUSB.write("ACK");
-        delay(50);
-        break;
-    }
-  }
+  Serial.write("fudge\n");
+  delay(1000);
+//  if (SerialUSB.readBytes(msg, 1 + sizeof(int))) {
+//    //msg[5] = '/0';
+//    switch ((char) msg[0]) {
+//      case 'D':
+//        //Serial.println((int)*(msg+1)-'0');
+//        // TODO: temporarily stop movement because of low battery
+////        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+//        delay(1000);
+//        // send acknowlegement
+//        SerialUSB.write("ACK");
+//        delay(50);
+//        break;
+//      case 'R':
+//        // TODO: temporarily stop movement because of low battery
+////        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+//        delay(1000);
+//        SerialUSB.write("ACK");
+//        delay(50);
+//        break;
+//    }
+//  }
   //  move_robot(LOW_SPEED, 0.5);
   //  rotate_robot(LOW_SPEED, 90);
   //  move_robot(LOW_SPEED, 8);

@@ -80,48 +80,48 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 //                }
 
                 // wait till camera is ready
-                while(mRgba == null);
-                // create new greyscale image
-                Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
-                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
-                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
-                Mat lines = new Mat();  // mat to draw lines
-
-                // magic
-                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
-
-                // draw the lines onto lines mat
-                for (int x = 0; x < lines.cols(); x++)
-                {
-                    double[] vec = lines.get(0, x);
-                    double x1 = vec[0],
-                            y1 = vec[1],
-                            x2 = vec[2],
-                            y2 = vec[3];
-                    Point start = new Point(x1, y1);
-                    Point end = new Point(x2, y2);
-
-//                    draw onto our camera
-                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
-
-                }
-
-                cameraPreview2Mat = thresholdImage;
-                publishProgress("camera");
+//                while(mRgba == null);
+//                // create new greyscale image
+//                Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
+//                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
+//                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
+//                Mat lines = new Mat();  // mat to draw lines
+//
+//                // magic
+//                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+//
+//                // draw the lines onto lines mat
+//                for (int x = 0; x < lines.cols(); x++)
+//                {
+//                    double[] vec = lines.get(0, x);
+//                    double x1 = vec[0],
+//                            y1 = vec[1],
+//                            x2 = vec[2],
+//                            y2 = vec[3];
+//                    Point start = new Point(x1, y1);
+//                    Point end = new Point(x2, y2);
+//
+////                    draw onto our camera
+//                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
+//
+//                }
+//
+//                cameraPreview2Mat = thresholdImage;
+//                publishProgress("camera");
 
                 // sleeping before going again
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    e.printStackTrace();
-                }
-
-
-                Log.i(TAG, "Sending R10 to arduino");
-                publishProgress("command", "R10");
-                ArduinoController.rotate_robot(new Float(180), true);
-                Log.i(TAG, "YAYY, IT WORKED!");
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    e.printStackTrace();
+//                }
+//
+//
+//                Log.i(TAG, "Sending R10 to arduino");
+//                publishProgress("command", "R10");
+//                ArduinoController.rotate_robot(new Float(180), true);
+//                Log.i(TAG, "YAYY, IT WORKED!");
 //
 //
 //                // sleeping
@@ -306,10 +306,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     @Override
     protected void onResume(){
         super.onResume();
-        statusText.setText(ArduinoController.start(this));
 
         // Camera stuff
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
+//        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
 
         // Wifi stuff
         if (wasAPEnabled) {
@@ -319,7 +318,14 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         }
         updateButtonStatus();
 
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG, "Starting ArduinoController");
         // wait a few seconds for opencv to get its shit together before starting mapping task
+        statusText.setText(ArduinoController.start(this));
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {

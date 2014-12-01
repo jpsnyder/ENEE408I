@@ -92,7 +92,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         public CdcAcmSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
-            mEnableAsyncReads = false; // (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
         }
 
         @Override
@@ -162,6 +162,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
         @Override
         public int read(byte[] dest, int timeoutMillis) throws IOException {
             Log.i(TAG, "in read()");
+            assert (mConnection != null);
             if (mEnableAsyncReads) {
               final UsbRequest request = new UsbRequest();
               try {
@@ -348,7 +349,8 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                         UsbId.ARDUINO_MEGA_ADK,
                         UsbId.ARDUINO_MEGA_ADK_R3,
                         UsbId.ARDUINO_LEONARDO,
-                        UsbId.ARDUINO_DUE,
+                        UsbId.ARDUINO_DUE_NATIVE,
+                        UsbId.ARDUINO_DUE_PROGRAMMING
                 });
         supportedDevices.put(Integer.valueOf(UsbId.VENDOR_VAN_OOIJEN_TECH),
                 new int[] {
