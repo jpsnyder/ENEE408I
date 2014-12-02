@@ -72,15 +72,15 @@ void loop() {
 //        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
         delay(50);
         // send acknowlegement
-        Serial.print("A"); // A for acknowledge
-        delay(50);
+        Serial.write("A"); // A for acknowledge
+//        delay(50);
         break;
       case 'R':
         // TODO: temporarily stop movement because of low battery
 //        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
         delay(50);
-        Serial.print("A");
-        delay(50);
+        Serial.write("A");
+//        delay(50);
         break;
     }
   }

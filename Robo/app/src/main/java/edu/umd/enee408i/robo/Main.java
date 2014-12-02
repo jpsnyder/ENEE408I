@@ -124,13 +124,13 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 Log.i(TAG, "YAYY, IT WORKED!");
 //
 //
-//                // sleeping
-//                try {
-//                    Thread.sleep(5000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted again!");
-//                    e.printStackTrace();
-//                }
+                // sleeping
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Log.i(TAG, "Thread interrupted again!");
+                    e.printStackTrace();
+                }
 //
 //                Log.i(TAG, "Sending D1 to arduino");
 //                publishProgress("command", "D1");

@@ -161,7 +161,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         @Override
         public int read(byte[] dest, int timeoutMillis) throws IOException {
-            Log.i(TAG, "in read()");
+            Log.d(TAG, "in read()");
             assert (mConnection != null);
             if (mEnableAsyncReads) {
               final UsbRequest request = new UsbRequest();
@@ -172,17 +172,17 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                   Log.d(TAG, "Error queueing request.");
                   throw new IOException("Error queueing request.");
                 }
-                Log.i(TAG, "Waiting for usbrequest");
+                Log.d(TAG, "Waiting for usbrequest");
                 // TODO: requestWait() wasn't working so I purposely turned off mEnableAsyncReads
                 final UsbRequest response = mConnection.requestWait();
-                Log.i(TAG, "Got request!");
+                Log.d(TAG, "Got request!");
                 if (response == null) {
                   Log.d(TAG, "Null response");
                   throw new IOException("Null response");
                 }
 
                 final int nread = buf.position();
-                Log.i(TAG, "nread = " + nread);
+                Log.d(TAG, "nread = " + nread);
                 if (nread > 0) {
                   Log.d(TAG, HexDump.dumpHexString(dest, 0, Math.min(32, dest.length)));
                   return nread;
@@ -195,15 +195,15 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
             }
 
             final int numBytesRead;
-            Log.i(TAG, "Attempting to get mReadBufferLock");
+            Log.d(TAG, "Attempting to get mReadBufferLock");
             synchronized (mReadBufferLock) {
                 int readAmt = Math.min(dest.length, mReadBuffer.length);
-                Log.i(TAG, "null pointer check = " + mReadEndpoint);
+                Log.d(TAG, "null pointer check = " + mReadEndpoint);
                 numBytesRead = mConnection.bulkTransfer(mReadEndpoint, mReadBuffer, readAmt,
                         timeoutMillis);
-                Log.i(TAG, "numBytesRead = " + numBytesRead);
+                Log.d(TAG, "numBytesRead = " + numBytesRead);
                 if (numBytesRead > 0){
-                    Log.i(TAG, "FUCK YEAH, WE READ SOME BYTES");
+                    Log.d(TAG, "FUCK YEAH, WE READ SOME BYTES");
                 }
                 if (numBytesRead < 0) {
                     // This sucks: we get -1 on timeout, not 0 as preferred.
@@ -212,7 +212,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                     // in response :\ -- http://b.android.com/28023
                     if (timeoutMillis == Integer.MAX_VALUE) {
                         // Hack: Special case "~infinite timeout" as an error.
-                        Log.i(TAG, "in special hack case :(");
+                        Log.d(TAG, "in special hack case :(");
                         return -1;
                     }
                     return 0;
@@ -242,7 +242,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                         System.arraycopy(src, offset, mWriteBuffer, 0, writeLength);
                         writeBuffer = mWriteBuffer;
                     }
-                    Log.i(TAG, "writeEndpoint = " + mWriteEndpoint);
+                    Log.d(TAG, "writeEndpoint = " + mWriteEndpoint);
                     amtWritten = mConnection.bulkTransfer(mWriteEndpoint, writeBuffer, writeLength,
                             timeoutMillis);
                 }
