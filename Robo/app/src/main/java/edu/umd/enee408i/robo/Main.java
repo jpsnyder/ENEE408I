@@ -118,10 +118,10 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 //                }
 //
 //
-//                Log.i(TAG, "Sending R10 to arduino");
-//                publishProgress("command", "R10");
-//                ArduinoController.rotate_robot(new Float(180), true);
-//                Log.i(TAG, "YAYY, IT WORKED!");
+                Log.i(TAG, "Sending R10 to arduino");
+                publishProgress("command", "R10");
+                ArduinoController.rotate_robot(new Float(180), true);
+                Log.i(TAG, "YAYY, IT WORKED!");
 //
 //
 //                // sleeping
@@ -163,8 +163,6 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
-//                    mOpenCvCameraView.enableView();
-//                    mOpenCvCameraView.setOnTouchListener(ColorRegionDetectionActivity.this);
                     cameraPreview.enableView();
                 } break;
                 default:
@@ -324,7 +322,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             e.printStackTrace();
         }
         Log.i(TAG, "Starting ArduinoController");
-        // wait a few seconds for opencv to get its shit together before starting mapping task
+        // wait a few seconds for opencv to get its shit together before starting arduinoController and mapping task
         statusText.setText(ArduinoController.start(this));
         try {
             Thread.sleep(2000);
@@ -351,8 +349,4 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
-    // Called when arduino controller receives data
-    public void receivedData(byte[] data){
-        Log.i(TAG, "Recieved from Arduino: " + data);
-    }
 }

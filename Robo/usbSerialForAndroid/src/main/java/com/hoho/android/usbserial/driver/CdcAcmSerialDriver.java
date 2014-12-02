@@ -92,7 +92,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         public CdcAcmSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
-            mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            mEnableAsyncReads = false; //(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
         }
 
         @Override
@@ -198,6 +198,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
             Log.i(TAG, "Attempting to get mReadBufferLock");
             synchronized (mReadBufferLock) {
                 int readAmt = Math.min(dest.length, mReadBuffer.length);
+                Log.i(TAG, "null pointer check = " + mReadEndpoint);
                 numBytesRead = mConnection.bulkTransfer(mReadEndpoint, mReadBuffer, readAmt,
                         timeoutMillis);
                 Log.i(TAG, "numBytesRead = " + numBytesRead);
@@ -241,7 +242,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                         System.arraycopy(src, offset, mWriteBuffer, 0, writeLength);
                         writeBuffer = mWriteBuffer;
                     }
-
+                    Log.i(TAG, "writeEndpoint = " + mWriteEndpoint);
                     amtWritten = mConnection.bulkTransfer(mWriteEndpoint, writeBuffer, writeLength,
                             timeoutMillis);
                 }

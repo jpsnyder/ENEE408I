@@ -81,31 +81,17 @@ public class ArduinoController {
 
                 @Override
                 public void onNewData(final byte[] data) {
-                    Log.i(TAG, "onNewData has been called!!!");
-                    updateReceivedData(data);
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            updateReceivedData(data);
-//                        }
-//                    });
+                    Log.i(TAG, "Received Data: " + ByteUtils.bytesToString(data));
+                    if (retrievedData == null){
+                        retrievedData = new LinkedList<String>();
+                    }
+                    retrievedData.add(ByteUtils.bytesToString(data));
                 }
             };
 
     private static void onDeviceStateChange() {
         stopIoManager();
         startIoManager();
-    }
-
-    private static void updateReceivedData(byte[] data) {
-        // TODO: parse data first? call another function?
-//        String stringData = new String(data);
-//        retrievedData.add(stringData);
-        Log.i(TAG, "Received Data: " + ByteUtils.bytesToString(data));
-        if (retrievedData == null){
-            retrievedData = new LinkedList<String>();
-        }
-        retrievedData.add(ByteUtils.bytesToString(data));
     }
 
     private static void stopIoManager() {
@@ -125,21 +111,12 @@ public class ArduinoController {
     }
 
 
-    public static int write(byte[] data){
+    public static void write(byte[] data){
         if (arduinoPort == null) {
             Log.i(TAG, "write failed");
-            return 0;
+            return;
         }
-        int bytesWritten;
-//        try {
-            bytesWritten = 8;
-            serialIOManager.writeAsync(data);
-//            bytesWritten = arduinoPort.write(data, 1000);
-//        } catch (IOException e) {
-//            return 0;
-//        }
-        Log.i(TAG, "wrote " + bytesWritten + " bytes");
-        return bytesWritten;
+        serialIOManager.writeAsync(data);
     }
 
     public static void move_robot(Float distance, boolean wait){
@@ -149,7 +126,7 @@ public class ArduinoController {
         if (wait){
             Log.i(TAG, "move_robot is waiting....");
             // wait for acknowledgment from arduino
-            while(!retrievedData.contains("ACK"));
+            while(retrievedData.isEmpty());
             Log.i(TAG, "move_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
@@ -161,7 +138,7 @@ public class ArduinoController {
         if (wait){
             Log.i(TAG, "rotate_robot is waiting....");
             // wait for acknowledgment from arduino
-            while(!retrievedData.contains("ACK"));
+            while(retrievedData.isEmpty());
             Log.i(TAG, "rotate_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
@@ -181,6 +158,7 @@ public class ArduinoController {
             return "No drivers found!";
         }
         // TODO: for now we are assuming the first one is the arduino....
+        Log.i(TAG, "Drivers found: " + drivers.toString());
         arduinoPort = drivers.get(0).getPorts().get(0);
 
         if (arduinoPort == null) {
@@ -189,7 +167,7 @@ public class ArduinoController {
         }
 
         UsbDevice device = arduinoPort.getDriver().getDevice();
-        Log.i(TAG, "Connected to productID: " + device.getProductId());
+        Log.i(TAG, "Connected to productID: " + device.getVendorId());
         UsbDeviceConnection connection = usbManager.openDevice(device);
         if (connection == null){
             Log.i(TAG, "Could not open device");
