@@ -40,7 +40,7 @@ public class SerialInputOutputManager implements Runnable {
     private static final String TAG = SerialInputOutputManager.class.getSimpleName();
     private static final boolean DEBUG = true;
 
-    private static final int READ_WAIT_MILLIS = 1000;
+    private static final int READ_WAIT_MILLIS = 500;
     private static final int BUFSIZ = 4096;
 
     private final UsbSerialPort mDriver;

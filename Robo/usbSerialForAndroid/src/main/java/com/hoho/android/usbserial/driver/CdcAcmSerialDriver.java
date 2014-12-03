@@ -198,13 +198,9 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
             Log.d(TAG, "Attempting to get mReadBufferLock");
             synchronized (mReadBufferLock) {
                 int readAmt = Math.min(dest.length, mReadBuffer.length);
-                Log.d(TAG, "null pointer check = " + mReadEndpoint);
                 numBytesRead = mConnection.bulkTransfer(mReadEndpoint, mReadBuffer, readAmt,
                         timeoutMillis);
                 Log.d(TAG, "numBytesRead = " + numBytesRead);
-                if (numBytesRead > 0){
-                    Log.d(TAG, "FUCK YEAH, WE READ SOME BYTES");
-                }
                 if (numBytesRead < 0) {
                     // This sucks: we get -1 on timeout, not 0 as preferred.
                     // We *should* use UsbRequest, except it has a bug/api oversight
