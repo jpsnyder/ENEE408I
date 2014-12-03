@@ -85,9 +85,10 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 // create new greyscale image
                 Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2HSV, 4);  // convert to HSV
-                Core.inRange(thresholdImage, new Scalar(0, 100, 30), new Scalar(5, 255, 255), thresholdImage);
-                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_GRAY2BGR, 0);
-                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_BGR2RGBA, 0);
+                // detect brown door between 127, 79, 33 and 150, 113, 41
+                Core.inRange(thresholdImage, new Scalar(40, 100, 30), new Scalar(45, 255, 255), thresholdImage);
+//                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_GRAY2BGR, 0);
+//                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_BGR2RGBA, 0);
 
 
                 // drawing lines program
@@ -117,31 +118,31 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
 
 
-                Log.i(TAG, "Sending R10 to arduino");
-                publishProgress("command", "R10");
-                ArduinoController.rotate_robot(new Float(180), true);
-                Log.i(TAG, "YAYY, IT WORKED!");
+//                Log.i(TAG, "Sending R10 to arduino");
+//                publishProgress("command", "R10");
+//                ArduinoController.rotate_robot(new Float(180), true);
+//                Log.i(TAG, "YAYY, IT WORKED!");
 
                 // at least a 1 second sleep is necessary between commands
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Log.i(TAG, "Thread interrupted again!");
                     e.printStackTrace();
                 }
-
-                Log.i(TAG, "Sending D1 to arduino");
-                publishProgress("command", "D1");
-                ArduinoController.move_robot(new Float(1), true);
-                Log.i(TAG, "YAYY, IT WORKED again!");
-
-                // at least a 1 second sleep is necessary between commands
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    e.printStackTrace();
-                }
+//
+//                Log.i(TAG, "Sending D1 to arduino");
+//                publishProgress("command", "D1");
+//                ArduinoController.move_robot(new Float(1), true);
+//                Log.i(TAG, "YAYY, IT WORKED again!");
+//
+//                // at least a 1 second sleep is necessary between commands
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    e.printStackTrace();
+//                }
 
             }
             return null;
