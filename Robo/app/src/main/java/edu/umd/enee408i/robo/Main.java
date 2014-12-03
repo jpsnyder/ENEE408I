@@ -90,7 +90,10 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
                 // magic
                 Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
-
+                double closestX = 1000, center = mRgba.width() / 2;
+                double angle = 0;
+                Point bestStart = new Point(0,0);
+                Point bestEnd = new Point(0,0);
                 // draw the lines onto lines mat
                 for (int x = 0; x < lines.cols(); x++)
                 {
@@ -104,6 +107,16 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
 //                    draw onto our camera
                     Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
+                    // Find closest lines, check if point is near bottom and close to center
+                    if(start.y > mRgba.height() - 10 && Math.abs(start.x - center) <= closestX){
+                        bestStart = start;
+                        bestEnd = end;
+                    }else if(end.y > mRgba.height() - 10 && Math.abs(end.x - center) <= closestX){
+                        bestStart = end;
+                        bestEnd = start;
+                    }
+                    angle = Math.atan((bestStart.x - bestEnd.x)/(mRgba.height() - bestEnd.y));
+                    angle *= 180 / Math.PI;
                 }
 
 
@@ -112,9 +125,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
 
 
-                Log.i(TAG, "Sending R10 to arduino");
+                Log.i(TAG, "Sending " + angle + " to arduino");
                 publishProgress("command", "R10");
-                ArduinoController.rotate_robot(new Float(180), true);
+                ArduinoController.rotate_robot(new Float(angle), true);
                 Log.i(TAG, "YAYY, IT WORKED!");
 
                 // at least a 1 second sleep is necessary between commands
