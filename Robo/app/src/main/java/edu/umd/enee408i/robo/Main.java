@@ -84,27 +84,32 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 while(mRgba == null);
                 // create new greyscale image
                 Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
-                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
-                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
-                Mat lines = new Mat();  // mat to draw lines
+                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2HSV, 4);  // convert to HSV
+                Core.inRange(thresholdImage, new Scalar(0, 100, 30), new Scalar(5, 255, 255), thresholdImage);
+                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_GRAY2BGR, 0);
+                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_BGR2RGBA, 0);
 
-                // magic
-                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
 
-                // draw the lines onto lines mat
-                for (int x = 0; x < lines.cols(); x++)
-                {
-                    double[] vec = lines.get(0, x);
-                    double x1 = vec[0],
-                            y1 = vec[1],
-                            x2 = vec[2],
-                            y2 = vec[3];
-                    Point start = new Point(x1, y1);
-                    Point end = new Point(x2, y2);
-
-//                    draw onto our camera
-                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
-                }
+                // drawing lines program
+//                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
+//                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
+//                Mat lines = new Mat();  // mat to draw lines
+//                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+//
+//                // draw the lines onto lines mat
+//                for (int x = 0; x < lines.cols(); x++)
+//                {
+//                    double[] vec = lines.get(0, x);
+//                    double x1 = vec[0],
+//                            y1 = vec[1],
+//                            x2 = vec[2],
+//                            y2 = vec[3];
+//                    Point start = new Point(x1, y1);
+//                    Point end = new Point(x2, y2);
+//
+////                    draw onto our camera
+//                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
+//                }
 
 
                 cameraPreview2Mat = thresholdImage;
