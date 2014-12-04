@@ -85,7 +85,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 // create new greyscale image
                 Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
-                Imgproc.Canny(thresholdImage, thresholdImage, 80, 100);
+                Imgproc.Canny(thresholdImage, thresholdImage, 100, 200);
                 Mat lines = new Mat();  // mat to draw lines
 
                 // magic
@@ -108,16 +108,20 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 //                    draw onto our camera
                     Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
                     // Find closest lines, check if point is near bottom and close to center
-                    if(start.y > mRgba.height() - 10 && Math.abs(start.x - center) <= closestX){
-                        bestStart = start;
-                        bestEnd = end;
-                    }else if(end.y > mRgba.height() - 10 && Math.abs(end.x - center) <= closestX){
-                        bestStart = end;
-                        bestEnd = start;
+                    if(start.y > mRgba.height() - 30 && Math.abs(start.x - center) <= closestX){
+                        if(Math.abs(start.y - end.y) > 50) {
+                            bestStart = start;
+                            bestEnd = end;
+                        }
+                    }else if(end.y > mRgba.height() - 30 && Math.abs(end.x - center) <= closestX){
+                        if(Math.abs(start.y - end.y) > 50) {
+                            bestStart = end;
+                            bestEnd = start;
+                        }
                     }
-                    angle = Math.atan((bestStart.x - bestEnd.x)/(mRgba.height() - bestEnd.y));
-                    angle *= 180 / Math.PI;
                 }
+                angle = Math.atan((bestStart.x - bestEnd.x)/(mRgba.height() - bestEnd.y));
+                angle *= 90 / Math.PI;
 
 
                 cameraPreview2Mat = thresholdImage;
@@ -126,7 +130,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
 
                 Log.i(TAG, "Sending " + angle + " to arduino");
-                publishProgress("command", "R10");
+                publishProgress("command", "R" + Math.round(angle));
                 ArduinoController.rotate_robot(new Float(angle), true);
                 Log.i(TAG, "YAYY, IT WORKED!");
 
@@ -138,18 +142,18 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     e.printStackTrace();
                 }
 
-                Log.i(TAG, "Sending D1 to arduino");
-                publishProgress("command", "D1");
-                ArduinoController.move_robot(new Float(1), true);
-                Log.i(TAG, "YAYY, IT WORKED again!");
-
-                // at least a 1 second sleep is necessary between commands
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    e.printStackTrace();
-                }
+//                Log.i(TAG, "Sending D1 to arduino");
+//                publishProgress("command", "D1");
+//                ArduinoController.move_robot(new Float(1), true);
+//                Log.i(TAG, "YAYY, IT WORKED again!");
+//
+//                // at least a 1 second sleep is necessary between commands
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    Log.i(TAG, "Thread interrupted again!");
+//                    e.printStackTrace();
+//                }
 
             }
             return null;

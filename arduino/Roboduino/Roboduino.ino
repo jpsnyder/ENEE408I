@@ -10,19 +10,19 @@
 #define ONE_ROTATION 3200  // number of ticks per rotation
 #define PI 3.14159265359
 
-//left wheel encoder
-const int encoderLPinA = 2;
-const int encoderLPinB = 3;
-volatile unsigned long encoderLPos;
 // right wheel encoder
-const int encoderRPinA = 4;
-const int encoderRPinB = 5;
+const int encoderRPinA = 2;
+const int encoderRPinB = 3;
 volatile unsigned long encoderRPos;
-// right wheel motor
+// left wheel encoder
+const int encoderLPinA = 4;
+const int encoderLPinB = 5;
+volatile unsigned long encoderLPos;
+// left wheel motor
 const int INA1 = 8;
 const int INB1 = 9;
 const int PWM1 = 10;
-// left wheel motor
+// right wheel motor
 const int INA2 = 11;
 const int INB2 = 12;
 const int PWM2 = 13;
@@ -69,7 +69,7 @@ void loop() {
       case 'D':
         //Serial.println((int)*(msg+1)-'0');
         // TODO: temporarily stop movement because of low battery
-//        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
         delay(50);
         // send acknowlegement
         Serial.write("A"); // A for acknowledge
@@ -77,7 +77,7 @@ void loop() {
         break;
       case 'R':
         // TODO: temporarily stop movement because of low battery
-//        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
         delay(50);
         Serial.write("A");
 //        delay(50);
@@ -184,16 +184,16 @@ void move_wheel(boolean right_wheel, int wheel_speed) {
   int pins[3];
 
   // Set INA, INB
-  if (right_wheel) {
+  if (!right_wheel) {
     pins[0] = INA1;
     pins[1] = INB1;
     pins[2] = PWM1;
     if (wheel_speed > 0) {
-      first = LOW;
-      second = HIGH;
-    } else if (wheel_speed < 0) {
       first = HIGH;
       second = LOW;
+    } else if (wheel_speed < 0) {
+      first = LOW;
+      second = HIGH;
     } else {
       first = LOW;
       second = LOW;
@@ -203,11 +203,11 @@ void move_wheel(boolean right_wheel, int wheel_speed) {
     pins[1] = INB2;
     pins[2] = PWM2;
     if (wheel_speed > 0) {
-      first = HIGH;
-      second = LOW;
-    } else if (wheel_speed < 0) {
       first = LOW;
       second = HIGH;
+    } else if (wheel_speed < 0) {
+      first = HIGH;
+      second = LOW;
     } else {
       first = LOW;
       second = LOW;
