@@ -60,62 +60,23 @@ void setup() {
 }
 
 void loop() {
-  // move_robot(LOW_SPEED, 1);
-  //  delay(1000);
+  
+  
+  // follow instructions given by arduino
   char msg[6];
   if (Serial.readBytes(msg, 1 + sizeof(int))) {
     //msg[5] = '/0';
     switch ((char) msg[0]) {
       case 'D':
-        //Serial.println((int)*(msg+1)-'0');
-        // TODO: temporarily stop movement because of low battery
         move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        delay(50);
-        // send acknowlegement
-        Serial.write("A"); // A for acknowledge
-//        delay(50);
         break;
       case 'R':
-        // TODO: temporarily stop movement because of low battery
         rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        delay(50);
-        Serial.write("A");
-//        delay(50);
         break;
     }
   }
 
 }
-
-//Serial.print("L: ");
-//Serial.print(encoderLPos);
-//Serial.print(" R: ");
-//Serial.print(encoderRPos);
-//Serial.println();
-
-//int report_distance(unsigned long distance) {
-//  if (SerialUSB.print("D")) {
-//    SerialUSB.print(distance);
-//  }
-//}
-//
-//int report_angle(unsigned long angle) {
-//  if (SerialUSB.print("R")) {
-//    SerialUSB.print(angle);
-//  }
-//}
-
-//int follow_instructions() {
-//  // read instructions
-//  byte buff[50];
-//  int size_instructions = sizeof(char) + sizeof(unsigned long);
-//  if (SerialUSB.readBytes(buff, size_instructions) == 0)
-//    return 0;
-//  if ((char) buff[0] == 'D')
-//    move_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
-//  if ((char) buff[0] == 'A')
-//    rotate_robot(LOW_SPEED, *((unsigned long*) (buff + 1)));
-//}
 
 void rotate_robot(int wheel_speed, float angle) {
   //counter-clockwise is positive
@@ -126,6 +87,14 @@ void rotate_robot(int wheel_speed, float angle) {
   encoderLPos = 0;
   encoderRPos = 0;
   while (wheel_speedL != STOP || wheel_speedR != STOP) {
+    // determine if android called stop
+    char msg;
+    if (Serial.readBytes(msg, 1) && msg == 'S'){
+      move_wheel(LEFT, STOP);
+      move_wheel(RIGHT, STOP);
+      return;
+    }
+    
     if (encoderLPos >= target)
       wheel_speedL = STOP;
     if (encoderRPos >= target)
@@ -133,12 +102,13 @@ void rotate_robot(int wheel_speed, float angle) {
     move_wheel(LEFT, wheel_speedL);
     move_wheel(RIGHT, wheel_speedR);
   }
+  Serial.write('A');  // send acknowledgement
 }
 
-unsigned long move_robot(int wheel_speed, float rotations) {
+void move_robot(int wheel_speed, float rotations) {
   int wheel_speedL = wheel_speed + LEFT_OFFSET;
   int wheel_speedR = wheel_speed;
-  encoderLPos = 0;
+  encoderLPos = 0; // reset wheel encoders
   encoderRPos = 0;
   int thresh = 2;
   //unsigned long start_posL = encoderLPos;
@@ -147,6 +117,14 @@ unsigned long move_robot(int wheel_speed, float rotations) {
   float speedL, speedR;
 
   while (((encoderLPos / ONE_ROTATION) <= rotations) && ((encoderRPos / ONE_ROTATION) <= rotations)) {
+     // determine if android called stop
+    char msg;
+    if (Serial.readBytes(msg, 1) && msg == 'S'){
+      move_wheel(LEFT, STOP);
+      move_wheel(RIGHT, STOP);
+      return;
+    }
+    
     if (encoderLPos / ONE_ROTATION <= rotations)
       move_wheel(LEFT, wheel_speedL);
     else move_wheel(LEFT, STOP);
@@ -173,7 +151,7 @@ unsigned long move_robot(int wheel_speed, float rotations) {
   }
   move_wheel(RIGHT, STOP);
   move_wheel(LEFT, STOP);
-  return encoderLPos;  // return rough distance it went
+  Serial.write('A');  // send acknowledgement
 }
 
 void move_wheel(boolean right_wheel, int wheel_speed) {
