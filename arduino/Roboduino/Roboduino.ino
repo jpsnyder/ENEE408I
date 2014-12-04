@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #define LEFT 0
 #define RIGHT 1
-#define THRESHOLD 30   // Threshold in inches
+#define WALL_THRESHOLD 30   // wall Threshold in inches
 #define HIGH_SPEED 150
 #define LOW_SPEED 80
 #define STOP 0
@@ -87,20 +87,21 @@ void rotate_robot(int wheel_speed, float angle) {
   encoderLPos = 0;
   encoderRPos = 0;
   while (wheel_speedL != STOP || wheel_speedR != STOP) {
-    // determine if android called stop
-    char msg;
-    if (Serial.readBytes(msg, 1) && msg == 'S'){
-      move_wheel(LEFT, STOP);
-      move_wheel(RIGHT, STOP);
-      return;
-    }
-    
     if (encoderLPos >= target)
       wheel_speedL = STOP;
     if (encoderRPos >= target)
       wheel_speedR = STOP;
     move_wheel(LEFT, wheel_speedL);
     move_wheel(RIGHT, wheel_speedR);
+    
+    // determine if android called stop
+    char msg;
+    if (Serial.readBytes(&msg, 1) && msg == 'S'){
+      move_wheel(LEFT, STOP);
+      move_wheel(RIGHT, STOP);
+      Serial.write('S'); // notify we stopped instead of completed
+      return;
+    }
   }
   Serial.write('A');  // send acknowledgement
 }
@@ -117,14 +118,6 @@ void move_robot(int wheel_speed, float rotations) {
   float speedL, speedR;
 
   while (((encoderLPos / ONE_ROTATION) <= rotations) && ((encoderRPos / ONE_ROTATION) <= rotations)) {
-     // determine if android called stop
-    char msg;
-    if (Serial.readBytes(msg, 1) && msg == 'S'){
-      move_wheel(LEFT, STOP);
-      move_wheel(RIGHT, STOP);
-      return;
-    }
-    
     if (encoderLPos / ONE_ROTATION <= rotations)
       move_wheel(LEFT, wheel_speedL);
     else move_wheel(LEFT, STOP);
@@ -147,6 +140,17 @@ void move_robot(int wheel_speed, float rotations) {
     else {
       wheel_speedL += 1;
       //wheel_speedR -= 1;
+    }
+    
+    // determine if android called stop or ping sensors detected wall too close
+    char msg;
+//    long left_inches = ping_inches(ping_left, 0);
+//    long right_inches = ping_inches(ping_right, 0);
+    if ((Serial.readBytes(&msg, 1) && msg == 'S')){ // || left_inches < WALL_THRESHOLD || right_inches < WALL_THRESHOLD){
+      move_wheel(LEFT, STOP);
+      move_wheel(RIGHT, STOP);
+      Serial.write('S'); // notify we stopped instead of completed
+      return;
     }
   }
   move_wheel(RIGHT, STOP);
