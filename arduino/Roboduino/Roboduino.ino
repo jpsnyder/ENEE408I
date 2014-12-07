@@ -28,13 +28,21 @@ const int INB2 = 12;
 const int PWM2 = 13;
 // right ping sensor
 const int ping_right = 22;
-const int ping_servo_right = 6;   // PWM
+Servo servo_right
+const int servo_right_pin = 6;   // PWM
 // left ping sensor
 const int ping_left = 24;
-const int ping_servo_left = 7;  // PWM
+Servo servo_left
+const int servo_left_pin = 7;  // PWM
 
 
 void setup() {
+  // servo setup
+  servo_right.attach(servo_right_pin);
+  servo_left.attach(servo_left_pin);
+  servo_right.write(90);
+  servo_left.write(90);
+  
   //left encoder setup
   pinMode(encoderLPinA, INPUT);
   pinMode(encoderLPinB, INPUT);
