@@ -28,11 +28,11 @@ const int INB2 = 12;
 const int PWM2 = 13;
 // right ping sensor
 const int ping_right = 22;
-Servo servo_right
+Servo servo_right;
 const int servo_right_pin = 6;   // PWM
 // left ping sensor
 const int ping_left = 24;
-Servo servo_left
+Servo servo_left;
 const int servo_left_pin = 7;  // PWM
 
 
@@ -40,9 +40,9 @@ void setup() {
   // servo setup
   servo_right.attach(servo_right_pin);
   servo_left.attach(servo_left_pin);
-  servo_right.write(90);
-  servo_left.write(90);
-  
+  servo_right.write(130);
+  servo_left.write(30);
+
   //left encoder setup
   pinMode(encoderLPinA, INPUT);
   pinMode(encoderLPinB, INPUT);
@@ -68,11 +68,11 @@ void setup() {
 }
 
 void loop() {
-  
-  
+
+
   // follow instructions given by arduino
   char msg[6];
-  if (Serial.readBytes(msg, 1 + sizeof(int))) {
+/*  if (Serial.readBytes(msg, 1 + sizeof(int))) {
     //msg[5] = '/0';
     switch ((char) msg[0]) {
       case 'D':
@@ -81,9 +81,16 @@ void loop() {
       case 'R':
         rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
         break;
+      case '<':
+        wall_follow(LOW_SPEED, LEFT);
+        break;
+      case '>':
+        wall_follow(LOW_SPEED, RIGHT);
+        break;
     }
   }
-
+*/
+wall_follow(LOW_SPEED, LEFT);
 }
 
 void rotate_robot(int wheel_speed, float angle) {
@@ -101,10 +108,10 @@ void rotate_robot(int wheel_speed, float angle) {
       wheel_speedR = STOP;
     move_wheel(LEFT, wheel_speedL);
     move_wheel(RIGHT, wheel_speedR);
-    
+
     // determine if android called stop
     char msg;
-    if (Serial.readBytes(&msg, 1) && msg == 'S'){
+    if (Serial.readBytes(&msg, 1) && msg == 'S') {
       move_wheel(LEFT, STOP);
       move_wheel(RIGHT, STOP);
       Serial.write('S'); // notify we stopped instead of completed
@@ -149,12 +156,12 @@ void move_robot(int wheel_speed, float rotations) {
       wheel_speedL += 1;
       //wheel_speedR -= 1;
     }
-    
+
     // determine if android called stop or ping sensors detected wall too close
     char msg;
-//    long left_inches = ping_inches(ping_left, 0);
-//    long right_inches = ping_inches(ping_right, 0);
-    if ((Serial.readBytes(&msg, 1) && msg == 'S')){ // || left_inches < WALL_THRESHOLD || right_inches < WALL_THRESHOLD){
+    long left_inches = ping_inches(ping_left, 0);
+    long right_inches = ping_inches(ping_right, 0);
+    if ((Serial.readBytes(&msg, 1) && msg == 'S') || left_inches < WALL_THRESHOLD || right_inches < WALL_THRESHOLD) {
       move_wheel(LEFT, STOP);
       move_wheel(RIGHT, STOP);
       Serial.write('S'); // notify we stopped instead of completed
@@ -262,6 +269,64 @@ long ping_duration(int ping_pin, unsigned long timeout) {
     duration = pulseIn(ping_pin, HIGH);
   }
   return duration;
+}
+
+void wall_follow(int spd, int dir) {
+  if (dir == LEFT) {
+    servo_right.write(160);
+    servo_left.write(90);
+  } else {
+    servo_right.write(90);
+    servo_left.write(20);
+  }
+  char msg;
+  int left_speed = spd + LEFT_OFFSET;
+  int right_speed = spd;
+  int margin = 0;
+  int wall_ping = (dir == LEFT) ? ping_left : ping_right;
+  int check_ping = (dir == LEFT) ? ping_right : ping_left;
+  delay(1000);
+  long wall_thresh = ping_inches(wall_ping, 0);
+  long wall_dist, check_dist;
+  while ( 1 ) {
+    wall_dist = ping_inches(wall_ping, 0);
+    check_dist = ping_inches(check_ping, 0);
+    if ( wall_dist > (wall_thresh + margin)) {
+      if (dir == LEFT) {
+        left_speed -= 1;
+        right_speed += 1;
+      } else {
+        left_speed += 1;
+        right_speed -= 1;
+      }
+    } else if ( wall_dist < (wall_thresh - margin)) {
+      if (dir == LEFT) {
+        left_speed += 1;
+        right_speed -= 1;
+      } else {
+        left_speed -= 1;
+        right_speed += 1;
+      }
+    }
+
+    if (check_dist < 10) {
+      left_speed = STOP;
+      right_speed = STOP;
+    }
+    
+
+    move_wheel(LEFT, left_speed);
+    move_wheel(RIGHT, right_speed);
+
+    if ((Serial.readBytes(&msg, 1) && msg == 'S') || left_speed == STOP || right_speed == STOP) {
+      servo_right.write(130);
+      servo_left.write(30);
+      move_wheel(LEFT, STOP);
+      move_wheel(RIGHT, STOP);
+      Serial.write('S'); // notify we stopped instead of completed
+      return;
+    }
+  }
 }
 
 long ping_inches(int ping_pin, unsigned long timeout) {
