@@ -128,19 +128,29 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 publishProgress("camera");
 
 
+                // follow left wall
+                Log.i(TAG, "Sending < to arduino");
+                publishProgress("command", "<");
+                ArduinoController.wall_follow_left();
+                Log.i(TAG, "< command sent");
 
-                Log.i(TAG, "Sending " + angle + " to arduino");
-                publishProgress("command", "R" + Math.round(angle));
-                ArduinoController.rotate_robot(new Float(angle), true);
-                Log.i(TAG, "YAYY, IT WORKED!");
+//                Log.i(TAG, "Sending " + angle + " to arduino");
+//                publishProgress("command", "R" + Math.round(angle));
+//                ArduinoController.rotate_robot(new Float(angle), true);
+//                Log.i(TAG, "YAYY, IT WORKED!");
 
                 // at least a 1 second sleep is necessary between commands
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10000);
                 } catch (InterruptedException e) {
                     Log.i(TAG, "Thread interrupted again!");
                     e.printStackTrace();
                 }
+
+                // stop the wall follow
+                Log.i(TAG, "Stop wall follow");
+                ArduinoController.stop_robot();
+                Log.i(TAG, "Stopped");
 
 //                Log.i(TAG, "Sending D1 to arduino");
 //                publishProgress("command", "D1");

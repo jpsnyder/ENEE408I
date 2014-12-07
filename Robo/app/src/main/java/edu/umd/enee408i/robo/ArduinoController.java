@@ -119,6 +119,24 @@ public class ArduinoController {
         serialIOManager.writeAsync(data);
     }
 
+    // sends 'S' to stop the arduino
+    public static void stop_robot(){
+        retrievedData.clear();
+        write(ByteUtils.stringToBytes("S"));
+    }
+
+    // follow the wall on left of robot
+    public static void wall_follow_left(){
+        retrievedData.clear();
+        write(ByteUtils.stringToBytes("<"));
+    }
+
+    // follow the wall on the right of robot
+    public static void wall_follow_right(){
+        retrievedData.clear();
+        write(ByteUtils.stringToBytes(">"));
+    }
+
     public static void move_robot(Float distance, boolean wait){
         String string = "D" + distance.toString() + "\r\n";
         retrievedData.clear();

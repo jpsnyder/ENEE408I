@@ -42,7 +42,6 @@ void setup() {
   servo_left.attach(servo_left_pin);
   servo_right.write(130);
   servo_left.write(30);
-
   //left encoder setup
   pinMode(encoderLPinA, INPUT);
   pinMode(encoderLPinB, INPUT);
@@ -72,7 +71,7 @@ void loop() {
 
   // follow instructions given by arduino
   char msg[6];
-/*  if (Serial.readBytes(msg, 1 + sizeof(int))) {
+  if (Serial.readBytes(msg, 1 + sizeof(int))) {
     //msg[5] = '/0';
     switch ((char) msg[0]) {
       case 'D':
@@ -89,8 +88,6 @@ void loop() {
         break;
     }
   }
-*/
-wall_follow(LOW_SPEED, LEFT);
 }
 
 void rotate_robot(int wheel_speed, float angle) {
