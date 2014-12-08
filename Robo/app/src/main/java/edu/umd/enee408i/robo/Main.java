@@ -37,6 +37,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Size;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -83,18 +84,43 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 // wait till camera is ready
                 while(mRgba == null);
                 // create new greyscale image
-                Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
+                Mat tempImage = new Mat(mRgba.size(), CvType.CV_8UC1);
+                //mRgba.convertTo(tempImage, -1, 1, 0);
+                Imgproc.cvtColor(mRgba, tempImage, Imgproc.COLOR_RGB2GRAY, 4);
+                //Imgproc.threshold(tempImage, tempImage, 100, 255, Imgproc.THRESH_BINARY);
+
+                // The following may be helpful for finding walls
+                //Imgproc.GaussianBlur(tempImage, tempImage, new Size(7,7), 0);
+                //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 20);
+
+                //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 17, 10);
+                Imgproc.blur(tempImage, tempImage, new Size(3,3));
+                int thresh = 30, ratio = 3;
+                Imgproc.Canny(tempImage, tempImage, thresh, ratio*thresh);
+                //Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
+                Mat thresholdImage = new Mat(mRgba.size(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
                 Imgproc.Canny(thresholdImage, thresholdImage, 100, 200);
                 Mat lines = new Mat();  // mat to draw lines
 
+                /*
+                // corner detection test
+                Mat cornerImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
+                Imgproc.cvtColor(mRgba, cornerImage, Imgproc.COLOR_RGB2GRAY, 4);
+                MatOfPoint corners = new MatOfPoint();
+                Mat mask = new Mat(mRgba.size(), CvType.CV_8UC1);
+                Imgproc.goodFeaturesToTrack(cornerImage, corners, 50, 0.1, 10, mask, 3, false, 0.04);
+                */
+
                 // magic
-                Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+                Imgproc.HoughLinesP(tempImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
                 double closestX = 1000, center = mRgba.width() / 2;
                 double angle = 0;
                 Point bestStart = new Point(0,0);
                 Point bestEnd = new Point(0,0);
                 // draw the lines onto lines mat
+
+
                 for (int x = 0; x < lines.cols(); x++)
                 {
                     double[] vec = lines.get(0, x);
@@ -106,7 +132,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     Point end = new Point(x2, y2);
 
 //                    draw onto our camera
-                    Core.line(thresholdImage, start, end, new Scalar(255, 0, 0), 3);
+                    Core.line(tempImage, start, end, new Scalar(255, 0, 0), 3);
                     // Find closest lines, check if point is near bottom and close to center
                     if(start.y > mRgba.height() - 30 && Math.abs(start.x - center) <= closestX){
                         if(Math.abs(start.y - end.y) > 50) {
@@ -123,15 +149,20 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 angle = Math.atan((bestStart.x - bestEnd.x)/(mRgba.height() - bestEnd.y));
                 angle *= 90 / Math.PI;
 
+                // Update camera image to see if corners are found
+                /*Point[] corner = corners.toArray();
+                for(Point px: corner)
+                { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
-                cameraPreview2Mat = thresholdImage;
+                cameraPreview2Mat = tempImage;
+                //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
 
 
                 // follow left wall
                 Log.i(TAG, "Sending < to arduino");
-                publishProgress("command", "<");
-                ArduinoController.wall_follow_left();
+                //publishProgress("command", "<");
+                //ArduinoController.wall_follow_left();
                 Log.i(TAG, "< command sent");
 
 //                Log.i(TAG, "Sending " + angle + " to arduino");
@@ -141,7 +172,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
                 // at least a 1 second sleep is necessary between commands
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(0);
                 } catch (InterruptedException e) {
                     Log.i(TAG, "Thread interrupted again!");
                     e.printStackTrace();
@@ -149,7 +180,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
                 // stop the wall follow
                 Log.i(TAG, "Stop wall follow");
-                ArduinoController.stop_robot();
+                //ArduinoController.stop_robot();
                 Log.i(TAG, "Stopped");
 
 //                Log.i(TAG, "Sending D1 to arduino");
