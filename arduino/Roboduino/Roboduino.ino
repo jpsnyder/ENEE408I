@@ -322,7 +322,7 @@ void wall_follow(int spd, int dir) {
   long wall_dist, check_dist, prev_wall_dist;
   while (1) {
     //float kp = 0.6, ki = 0.05, kd = 0.1;
-    float kp = 0.6, ki = 0.05, kd = 0.15, output, dt;
+    float kp = 0.6, ki = 0.05, kd = 0.2, output, dt;
     float previous_error = 0;
     float integral = 0;
     float error, derivative;
@@ -341,7 +341,7 @@ void wall_follow(int spd, int dir) {
       error =  (wall_thresh - wall_dist);
       integral = integral + error * dt;
       derivative = (error - previous_error) / dt;
-      output = min(max(kp * error + ki * integral + kd * derivative, -150), 150);
+      output = min(max(kp * error + ki * integral + kd * derivative, -130), 130);
       previous_error = error;
       /*
       if (dir == LEFT) {
