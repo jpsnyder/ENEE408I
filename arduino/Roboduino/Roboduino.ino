@@ -330,7 +330,7 @@ void wall_follow(int spd, int dir) {
     unsigned long time;
 
     check_dist = ping_inches(check_ping, 0);
-    while (check_dist > 20) { // begin wall following adventure
+    while (check_dist > 24) { // begin wall following adventure
       time = millis();
       delay(100);
       prev_wall_dist = wall_dist;
@@ -388,7 +388,7 @@ void wall_follow(int spd, int dir) {
     move_wheel(LEFT, STOP);
     move_wheel(RIGHT, STOP);
     delay(500);
-    rotate_robot(LOW_SPEED, (dir == LEFT) ? -90 : 90);
+    rotate_robot(LOW_SPEED, (dir == LEFT) ? -70 : 70);
   }
 }
 
