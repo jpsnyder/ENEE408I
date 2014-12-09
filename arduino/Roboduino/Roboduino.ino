@@ -70,7 +70,8 @@ void setup() {
 
 void loop() {
 
-  wall_follow(LOW_SPEED, RIGHT);
+  //wall_follow(120, RIGHT);
+  wall_follow(120, RIGHT);
   // follow instructions given by arduino
   //  char msg[6];
   //  if (Serial.readBytes(msg, 1 + sizeof(int))) {
@@ -314,56 +315,82 @@ void wall_follow(int spd, int dir) {
     servo_right_angle = 90;
     servo_left_angle = 20;
   }
-  delay(1000);
-  long max_wall_thresh = 50;
-  long wall_dist, check_dist;
-
-  float kp = 0.6, ki = 0.1, kd = 0.4, output, dt;
-  float previous_error = 0;
-  float integral = 0;
-  float error, derivative;
-  float wall_thresh = 24;
-  unsigned long time;
   servo_right.write(servo_right_angle);
   servo_left.write(servo_left_angle);
+  delay(1000);
+  long max_wall_thresh = 50;
+  long wall_dist, check_dist, prev_wall_dist;
   while (1) {
-    // align servos
+    //float kp = 0.6, ki = 0.05, kd = 0.1;
+    float kp = 0.6, ki = 0.05, kd = 0.15, output, dt;
+    float previous_error = 0;
+    float integral = 0;
+    float error, derivative;
+    float wall_thresh = 15;
+    unsigned long time;
 
-    time = millis();
-    delay(100);
-    wall_dist = ping_inches(wall_ping, 0);
     check_dist = ping_inches(check_ping, 0);
-    dt = ((float)(millis() - time)) / 1000;
-    error =  wall_thresh - wall_dist;
-    integral = integral + error * dt;
-    derivative = (error - previous_error) / dt;
-    output = kp * error + ki * integral + kd * derivative;
-    if (dir == LEFT) {
-      move_wheel(LEFT, spd + output * .1);
-      move_wheel(RIGHT, spd - output *.1);
-    } else {
-      move_wheel(LEFT, spd - output * .1);
-      move_wheel(RIGHT, spd + output * .1);
-    }
-    previous_error = error;
-    /*
-    Serial.print("Output = ");
-    Serial.println(output);
-        Serial.print("Integral = ");
-    Serial.println(integral);
-        Serial.print("derivative = ");
-    Serial.println(derivative);
-            Serial.print("error = ");
-    Serial.println(error);
-    
-    Serial.print("wall_dist = ");
-    Serial.println(wall_dist);*/
+    while (check_dist > 20) { // begin wall following adventure
+      time = millis();
+      delay(100);
+      prev_wall_dist = wall_dist;
+      wall_dist = ping_inches(wall_ping, 0);
+      wall_dist = wall_dist ? wall_dist : prev_wall_dist;
+      check_dist = ping_inches(check_ping, 0);
+      dt = ((float)(millis() - time)) / 1000;
+      error =  (wall_thresh - wall_dist);
+      integral = integral + error * dt;
+      derivative = (error - previous_error) / dt;
+      output = min(max(kp * error + ki * integral + kd * derivative, -150), 150);
+      previous_error = error;
+      /*
+      if (dir == LEFT) {
+        if (abs(derivative) < 200) {
+          move_wheel(LEFT, spd + output + LEFT_OFFSET);
+          move_wheel(RIGHT, spd - output);
+        } else {
+          delay(400);
+          move_wheel(LEFT, spd + output + LEFT_OFFSET);
+          move_wheel(RIGHT, spd - output);
+        }
+      } else {
+        if (abs(derivative) < 200) {
+          move_wheel(LEFT, spd - output + LEFT_OFFSET);
+          move_wheel(RIGHT, spd + output);
+        } else {
+          delay(400);
+          move_wheel(LEFT, spd - output + LEFT_OFFSET);
+          move_wheel(RIGHT, spd + output);
+        }
+      }*/
+      
+      if (dir == LEFT) {
+        move_wheel(LEFT, spd + output + LEFT_OFFSET);
+        move_wheel(RIGHT, spd - output);
+      } else {
+        move_wheel(LEFT, spd - output + LEFT_OFFSET);
+        move_wheel(RIGHT, spd + output);
+      }
 
-
+      /*
+      Serial.print("Output = ");
+      Serial.println(output);
+          Serial.print("Integral = ");
+      Serial.println(integral);
+          Serial.print("derivative = ");
+      Serial.println(derivative);
+              Serial.print("error = ");
+      Serial.println(error);
+      */
+      //Serial.print("wall_dist = ");
+      //Serial.println(wall_dist);
+    } // end wall following adventure
+    move_wheel(LEFT, STOP);
+    move_wheel(RIGHT, STOP);
+    delay(500);
+    rotate_robot(LOW_SPEED, (dir == LEFT) ? -90 : 90);
   }
-
 }
-
 
 
 
