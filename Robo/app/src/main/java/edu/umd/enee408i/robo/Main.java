@@ -84,19 +84,27 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 // wait till camera is ready
                 while(mRgba == null);
                 // create new greyscale image
-                Mat tempImage = new Mat(mRgba.size(), CvType.CV_8UC1);
+                Mat wallImage = new Mat(mRgba.size(), CvType.CV_8UC1);
                 //mRgba.convertTo(tempImage, -1, 1, 0);
-                Imgproc.cvtColor(mRgba, tempImage, Imgproc.COLOR_RGB2GRAY, 4);
+                Imgproc.cvtColor(mRgba, wallImage, Imgproc.COLOR_RGB2GRAY, 4);
                 //Imgproc.threshold(tempImage, tempImage, 100, 255, Imgproc.THRESH_BINARY);
 
                 // The following may be helpful for finding walls
-                //Imgproc.GaussianBlur(tempImage, tempImage, new Size(7,7), 0);
+                Imgproc.GaussianBlur(wallImage, wallImage, new Size(7,7), 0);
+                Imgproc.adaptiveThreshold(wallImage, wallImage, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 23, 12);
+                int dilation_size = 3;
+                Mat morphElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2*dilation_size + 1, 2*dilation_size+1));
+                Imgproc.dilate(wallImage, wallImage, morphElement);
+                Mat invertcolormatrix= new Mat(wallImage.rows(),wallImage.cols(), wallImage.type(), new Scalar(255,0,0));
+                Core.subtract(invertcolormatrix, wallImage, wallImage);
                 //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 20);
 
-                //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 17, 10);
-                Imgproc.blur(tempImage, tempImage, new Size(3,3));
-                int thresh = 30, ratio = 3;
-                Imgproc.Canny(tempImage, tempImage, thresh, ratio*thresh);
+                //
+
+                //Imgproc.blur(tempImage, tempImage, new Size(3,3));
+                //int thresh = 30, ratio = 3;
+                //Imgproc.Canny(tempImage, tempImage, thresh, ratio*thresh);
+
                 //Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Mat thresholdImage = new Mat(mRgba.size(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
@@ -113,7 +121,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 */
 
                 // magic
-                Imgproc.HoughLinesP(tempImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+                Imgproc.HoughLinesP(wallImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
                 double closestX = 1000, center = mRgba.width() / 2;
                 double angle = 0;
                 Point bestStart = new Point(0,0);
@@ -132,14 +140,14 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     Point end = new Point(x2, y2);
 
 //                    draw onto our camera
-                    Core.line(tempImage, start, end, new Scalar(255, 0, 0), 3);
+                    Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
                     // Find closest lines, check if point is near bottom and close to center
                     if(start.y > mRgba.height() - 30 && Math.abs(start.x - center) <= closestX){
                         if(Math.abs(start.y - end.y) > 50) {
                             bestStart = start;
                             bestEnd = end;
                         }
-                    }else if(end.y > mRgba.height() - 30 && Math.abs(end.x - center) <= closestX){
+                    } else if(end.y > mRgba.height() - 30 && Math.abs(end.x - center) <= closestX){
                         if(Math.abs(start.y - end.y) > 50) {
                             bestStart = end;
                             bestEnd = start;
@@ -154,7 +162,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 for(Point px: corner)
                 { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
-                cameraPreview2Mat = tempImage;
+                cameraPreview2Mat = wallImage;
                 //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
 

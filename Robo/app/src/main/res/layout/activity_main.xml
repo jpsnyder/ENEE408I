@@ -47,15 +47,15 @@
         android:layout_alignParentStart="true" />
 
     <org.opencv.android.JavaCameraView
-        android:layout_width="331dp"
-        android:layout_height="261dp"
+        android:layout_width="320dp"
+        android:layout_height="256dp"
         android:id="@+id/cameraView"
         android:layout_toStartOf="@+id/btnWifiToggle"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/scrollView"
         android:layout_toEndOf="@+id/scrollView"
         android:layout_above="@+id/statusText"
-        android:layout_x="24dp"
+        android:layout_x="10dp"
         android:layout_y="0dp" />
 
     <Button
@@ -72,11 +72,11 @@
         android:layout_y="385dp" />
 
     <ImageView
-        android:layout_width="286dp"
-        android:layout_height="286dp"
+        android:layout_width="320dp"
+        android:layout_height="256dp"
         android:id="@+id/cameraView2"
-        android:layout_x="397dp"
-        android:layout_y="-3dp" />
+        android:layout_x="370dp"
+        android:layout_y="0dp" />
 
     <EditText
         android:layout_width="163dp"
