@@ -9,6 +9,8 @@
 #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
 #define ONE_ROTATION 3200  // number of ticks per rotation
 #define PI 3.14159265359
+#define SERVO_LEFT_DEFAULT 30
+#define SERVO_RIGHT_DEFAULT 130
 
 // right wheel encoder
 const int encoderRPinA = 2;
@@ -40,8 +42,8 @@ void setup() {
   // servo setup
   servo_right.attach(servo_right_pin);
   servo_left.attach(servo_left_pin);
-  servo_right.write(130);
-  servo_left.write(30);
+  servo_right.write(SERVO_RIGHT_DEFAULT);
+  servo_left.write(SERVO_LEFT_DEFAULT);
   //left encoder setup
   pinMode(encoderLPinA, INPUT);
   pinMode(encoderLPinB, INPUT);
@@ -68,26 +70,25 @@ void setup() {
 
 void loop() {
 
-
+  wall_follow(LOW_SPEED, RIGHT);
   // follow instructions given by arduino
-  char msg[6];
-  if (Serial.readBytes(msg, 1 + sizeof(int))) {
-    //msg[5] = '/0';
-    switch ((char) msg[0]) {
-      case 'D':
-        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        break;
-      case 'R':
-        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
-        break;
-      case '<':
-        wall_follow(LOW_SPEED, LEFT);
-        break;
-      case '>':
-        wall_follow(LOW_SPEED, RIGHT);
-        break;
-    }
-  }
+  //  char msg[6];
+  //  if (Serial.readBytes(msg, 1 + sizeof(int))) {
+  //    switch ((char) msg[0]) {
+  //      case 'D':
+  //        move_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+  //        break;
+  //      case 'R':
+  //        rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
+  //        break;
+  //      case '<':
+  //        wall_follow(LOW_SPEED, LEFT);
+  //        break;
+  //      case '>':
+  //        wall_follow(LOW_SPEED, RIGHT);
+  //        break;
+  //    }
+  //  }
 }
 
 void rotate_robot(int wheel_speed, float angle) {
@@ -268,63 +269,201 @@ long ping_duration(int ping_pin, unsigned long timeout) {
   return duration;
 }
 
+//void wall_follow2(int spd, int dir) {
+//  servo_right.write(130);
+//  servo_left.write(30);
+//
+//  char msg;
+//  int left_speed = spd + LEFT_OFFSET;
+//  int right_speed = spd;
+//  int wall_thresh = 5;
+//  int wall_dist;
+//  int wall_ping = (dir == LEFT) ? ping_left : ping_right;
+//  int check_ping = (dir == LEFT) ? ping_right : ping_left;
+//
+//  while (1){
+//    wall_dist = ping_inches(wall_ping, 0);
+//    if ( wall_dist > wall_thresh) {
+//      // dive into wall
+//      if (dir == LEFT) {
+//        left_speed -= 1;
+//        right_speed += 1;
+//      } else {
+//        left_speed += 1;
+//        right_speed -= 1;
+//      }
+//    } else {
+//
+//    }
+//  }
+//}
+
 void wall_follow(int spd, int dir) {
-  if (dir == LEFT) {
-    servo_right.write(160);
-    servo_left.write(90);
-  } else {
-    servo_right.write(90);
-    servo_left.write(20);
-  }
+
   char msg;
   int left_speed = spd + LEFT_OFFSET;
   int right_speed = spd;
   int margin = 0;
   int wall_ping = (dir == LEFT) ? ping_left : ping_right;
   int check_ping = (dir == LEFT) ? ping_right : ping_left;
+  int servo_right_angle, servo_left_angle;
+  if (dir == LEFT) {
+    servo_right_angle = 160;
+    servo_left_angle = 90;
+  } else {
+    servo_right_angle = 90;
+    servo_left_angle = 20;
+  }
   delay(1000);
-  long wall_thresh = ping_inches(wall_ping, 0);
+  long max_wall_thresh = 50;
   long wall_dist, check_dist;
-  while ( 1 ) {
+
+  float kp = 0.6, ki = 0.1, kd = 0.4, output, dt;
+  float previous_error = 0;
+  float integral = 0;
+  float error, derivative;
+  float wall_thresh = 24;
+  unsigned long time;
+  servo_right.write(servo_right_angle);
+  servo_left.write(servo_left_angle);
+  while (1) {
+    // align servos
+
+    time = millis();
+    delay(100);
     wall_dist = ping_inches(wall_ping, 0);
     check_dist = ping_inches(check_ping, 0);
-    if ( wall_dist > (wall_thresh + margin)) {
-      if (dir == LEFT) {
-        left_speed -= 1;
-        right_speed += 1;
-      } else {
-        left_speed += 1;
-        right_speed -= 1;
-      }
-    } else if ( wall_dist < (wall_thresh - margin)) {
-      if (dir == LEFT) {
-        left_speed += 1;
-        right_speed -= 1;
-      } else {
-        left_speed -= 1;
-        right_speed += 1;
-      }
+    dt = ((float)(millis() - time)) / 1000;
+    error =  wall_thresh - wall_dist;
+    integral = integral + error * dt;
+    derivative = (error - previous_error) / dt;
+    output = kp * error + ki * integral + kd * derivative;
+    if (dir == LEFT) {
+      move_wheel(LEFT, spd + output * .1);
+      move_wheel(RIGHT, spd - output *.1);
+    } else {
+      move_wheel(LEFT, spd - output * .1);
+      move_wheel(RIGHT, spd + output * .1);
     }
-
-    if (check_dist < 10) {
-      left_speed = STOP;
-      right_speed = STOP;
-    }
+    previous_error = error;
+    /*
+    Serial.print("Output = ");
+    Serial.println(output);
+        Serial.print("Integral = ");
+    Serial.println(integral);
+        Serial.print("derivative = ");
+    Serial.println(derivative);
+            Serial.print("error = ");
+    Serial.println(error);
     
+    Serial.print("wall_dist = ");
+    Serial.println(wall_dist);*/
 
-    move_wheel(LEFT, left_speed);
-    move_wheel(RIGHT, right_speed);
 
-    if ((Serial.readBytes(&msg, 1) && msg == 'S') || left_speed == STOP || right_speed == STOP) {
-      servo_right.write(130);
-      servo_left.write(30);
-      move_wheel(LEFT, STOP);
-      move_wheel(RIGHT, STOP);
-      Serial.write('S'); // notify we stopped instead of completed
-      return;
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+while ( 1 ) {
+  // align servos
+  servo_right.write(servo_right_angle);
+  servo_left.write(servo_left_angle);
+
+  // check ping distances
+  wall_dist = ping_inches(wall_ping, 0);
+  check_dist = ping_inches(check_ping, 0);
+
+  // robot is too far away from the wall, turn towards the wall.
+  if ( max_wall_thresh > wall_dist > (wall_thresh + margin)) {
+    // wall is right next to the robot, continue moving straight
+  } else if ( wall_dist > max_wall_thresh) {
+    // wall has disapear, carve the corner
+    if (dir == LEFT){
+      left_speed += 5;
+      right_speed = 0;
+
+    } else {
+      left_speed = 0;
+      right_speed += 5;
+    }
+
+  }
+
+//      if (dir == LEFT) {
+//        left_speed -= 5;
+//        right_speed += 5;
+//      } else {
+//        left_speed += 5;
+//        right_speed -= 5;
+//      }
+  } else if ( wall_dist < (wall_thresh - margin)) {
+    if (dir == LEFT) {
+      left_speed += 5;
+      right_speed = 0;
+    } else {
+      left_speed = 0;
+      right_speed += 5;
     }
   }
+
+
+  // determine if a corner
+  // if check_dist < 10 turn oposite of wall else if wall_dist > big threshold, rotate towards the wall
+
+//    if (check_dist < 10) {
+//      if (dir == LEFT){
+//        // rotate 90 degrees clock-wise
+//        rotate_robot(LOW_SPEED, 90);
+//      } else {
+//        // rotate 90 degrees counter clock-wise
+//        rotate_robot(LOW_SPEED, -90);
+//      }
+//      // reset speeds
+//      left_speed = spd + LEFT_OFFSET;
+//      right_speed = spd;
+//    // check if wall_ping is very far from the wall, we hit a corner
+//    } else if (wall_ping > 24){
+//      // clear away from the the wall
+//      move_robot(LOW_SPEED, 2);
+//      // rotate towards the previously existing wall
+//      if (dir == LEFT){
+//        rotate_robot(LOW_SPEED, -90);
+//      } else {
+//        rotate_robot(LOW_SPEED, 90);
+//      }
+//      // set up position
+//      move_robot(LOW_SPEED, 2);
+//      left_speed = spd + LEFT_OFFSET;
+//      right_speed = spd;
+//    }
+
+
+  move_wheel(LEFT, left_speed);
+  move_wheel(RIGHT, right_speed);
+
+  if ((Serial.readBytes(&msg, 1) && msg == 'S') || left_speed == STOP || right_speed == STOP) {
+    servo_right.write(130);
+    servo_left.write(30);
+    move_wheel(LEFT, STOP);
+    move_wheel(RIGHT, STOP);
+    Serial.write('S'); // notify we stopped instead of completed
+    return;
+  }
 }
+}
+*/
+
 
 long ping_inches(int ping_pin, unsigned long timeout) {
   return microseconds_to_inches(ping_duration(ping_pin, inches_to_microseconds(timeout)));
