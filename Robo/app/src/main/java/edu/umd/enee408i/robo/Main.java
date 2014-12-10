@@ -118,16 +118,19 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 Imgproc.cvtColor(mRgba, mRgba_temp, Imgproc.COLOR_RGBA2BGR, 0);
                 Core.inRange(mRgba_temp, new Scalar(0, 0,115), new Scalar(60, 255, 150), mask);
 
+
+
                 int count = 0;
-                for(int row_i = 0; row_i < mRgba_temp.rows(); row_i++){
-                    for(int col_i = 0; col_i < mRgba_temp.cols(); col_i++){
-                        double pixel[] = mRgba_temp.get(row_i, col_i);
-                        if (!(pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0)){
+                for(int row_i = 0; row_i < mask.rows(); row_i++){
+                    for(int col_i = 0; col_i < mask.cols(); col_i++){
+                        double pixel[] = mask.get(row_i, col_i);
+                        if ((pixel[0] > 0)){
                             count++;
                         }
                     }
                 }
-                if(count > 100){
+                Log.i(TAG, "Count = " + count);
+                if(count > 400){
                     Log.i(TAG, "FOUND DOOR!");
                 } else {
                     Log.i(TAG, "NO DOOR!");
@@ -157,41 +160,59 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
                     // Find closest lines, check if point is near bottom and close to center
                 }
-//                if(safe) {
-//                    ArduinoController.move_robot(1f, true);
-//                } else {
-//                    ArduinoController.rotate_robot(10f, true);
-//                }
+                if(safe) {
+                    ArduinoController.move_robot(100f, true);
+                    // at least a 1 second sleep is necessary between commands
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Thread interrupted again!");
+                        e.printStackTrace();
+                    }
+                    ArduinoController.rotate_robot(90f, true);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Thread interrupted again!");
+                        e.printStackTrace();
+                    }
+                    ArduinoController.wall_follow_right();
+                    while(!false);
+
+                } else {
+                    ArduinoController.rotate_robot(10f, true);
+                    // at least a 1 second sleep is necessary between commands
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Thread interrupted again!");
+                        e.printStackTrace();
+                    }
+                }
                 // Update camera image to see if corners are found
                 /*Point[] corner = corners.toArray();
                 for(Point px: corner)
                 { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
 
-                cameraPreview2Mat = mask;
+                cameraPreview2Mat = wallImage;
                 //cameraPreview2Mat = wallImage;
                 //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
 
 
                 // follow left wall
-                Log.i(TAG, "Sending < to arduino");
+//                Log.i(TAG, "Sending < to arduino");
                 //publishProgress("command", "<");
                 //ArduinoController.wall_follow_left();
-                Log.i(TAG, "< command sent");
+//                Log.i(TAG, "< command sent");
 
 //                Log.i(TAG, "Sending " + angle + " to arduino");
 //                publishProgress("command", "R" + Math.round(angle));
 //                ArduinoController.rotate_robot(new Float(angle), true);
 //                Log.i(TAG, "YAYY, IT WORKED!");
 
-                // at least a 1 second sleep is necessary between commands
-                try {
-                    Thread.sleep(0);
-                } catch (InterruptedException e) {
-                    Log.i(TAG, "Thread interrupted again!");
-                    e.printStackTrace();
-                }
+
 
                 // stop the wall follow
                 Log.i(TAG, "Stop wall follow");
