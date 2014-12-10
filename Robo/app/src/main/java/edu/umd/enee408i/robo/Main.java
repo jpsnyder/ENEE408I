@@ -95,8 +95,9 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 int dilation_size = 3;
                 Mat morphElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2*dilation_size + 1, 2*dilation_size+1));
                 Imgproc.dilate(wallImage, wallImage, morphElement);
-                Mat invertcolormatrix= new Mat(wallImage.rows(),wallImage.cols(), wallImage.type(), new Scalar(255,0,0));
-                Core.subtract(invertcolormatrix, wallImage, wallImage);
+
+                Mat invertColorMatrix= new Mat(wallImage.rows(),wallImage.cols(), wallImage.type(), new Scalar(255,0,0));
+                Core.subtract(invertColorMatrix, wallImage, wallImage);
                 //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 20);
 
                 //
@@ -111,24 +112,33 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 Imgproc.Canny(thresholdImage, thresholdImage, 100, 200);
                 Mat lines = new Mat();  // mat to draw lines
 
-                /*
-                // corner detection test
-                Mat cornerImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
-                Imgproc.cvtColor(mRgba, cornerImage, Imgproc.COLOR_RGB2GRAY, 4);
-                MatOfPoint corners = new MatOfPoint();
-                Mat mask = new Mat(mRgba.size(), CvType.CV_8UC1);
-                Imgproc.goodFeaturesToTrack(cornerImage, corners, 50, 0.1, 10, mask, 3, false, 0.04);
-                */
+                // find the door color
+                Mat mask = new Mat(mRgba.size(), mRgba.type());
+                Mat mRgba_temp = new Mat(mRgba.size(), mRgba.type());
+                Imgproc.cvtColor(mRgba, mRgba_temp, Imgproc.COLOR_RGBA2BGR, 0);
+                Core.inRange(mRgba_temp, new Scalar(0, 0,115), new Scalar(60, 255, 150), mask);
+
+                int count = 0;
+                for(int row_i = 0; row_i < mRgba_temp.rows(); row_i++){
+                    for(int col_i = 0; col_i < mRgba_temp.cols(); col_i++){
+                        double pixel[] = mRgba_temp.get(row_i, col_i);
+                        if (!(pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0)){
+                            count++;
+                        }
+                    }
+                }
+                if(count > 100){
+                    Log.i(TAG, "FOUND DOOR!");
+                } else {
+                    Log.i(TAG, "NO DOOR!");
+                }
 
                 // magic
                 Imgproc.HoughLinesP(wallImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
-                double closestX = 1000, center = mRgba.width() / 2;
-                double angle = 0;
-                Point bestStart = new Point(0,0);
-                Point bestEnd = new Point(0,0);
+                double xRange = wallImage.cols();
+                boolean safe = false;
+
                 // draw the lines onto lines mat
-
-
                 for (int x = 0; x < lines.cols(); x++)
                 {
                     double[] vec = lines.get(0, x);
@@ -138,31 +148,28 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                             y2 = vec[3];
                     Point start = new Point(x1, y1);
                     Point end = new Point(x2, y2);
+                    if(start.x < xRange / 3 && end.x > xRange * 2/3 || end.x < xRange / 3 && start.x > xRange * 2/3){
+                        safe = true;
+                    }
+
 
 //                    draw onto our camera
                     Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
                     // Find closest lines, check if point is near bottom and close to center
-                    if(start.y > mRgba.height() - 30 && Math.abs(start.x - center) <= closestX){
-                        if(Math.abs(start.y - end.y) > 50) {
-                            bestStart = start;
-                            bestEnd = end;
-                        }
-                    } else if(end.y > mRgba.height() - 30 && Math.abs(end.x - center) <= closestX){
-                        if(Math.abs(start.y - end.y) > 50) {
-                            bestStart = end;
-                            bestEnd = start;
-                        }
-                    }
                 }
-                angle = Math.atan((bestStart.x - bestEnd.x)/(mRgba.height() - bestEnd.y));
-                angle *= 90 / Math.PI;
-
+//                if(safe) {
+//                    ArduinoController.move_robot(1f, true);
+//                } else {
+//                    ArduinoController.rotate_robot(10f, true);
+//                }
                 // Update camera image to see if corners are found
                 /*Point[] corner = corners.toArray();
                 for(Point px: corner)
                 { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
-                cameraPreview2Mat = wallImage;
+
+                cameraPreview2Mat = mask;
+                //cameraPreview2Mat = wallImage;
                 //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
 
