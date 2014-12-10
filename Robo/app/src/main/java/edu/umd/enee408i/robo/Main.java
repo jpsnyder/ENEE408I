@@ -179,7 +179,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
                     // Find closest lines, check if point is near bottom and close to center
                 }
-                /*
+
                 if(safe) {
                     ArduinoController.move_robot(100f, true);
                     // at least a 1 second sleep is necessary between commands
@@ -208,7 +208,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                         Log.i(TAG, "Thread interrupted again!");
                         e.printStackTrace();
                     }
-                }*/
+                }
                 // Update camera image to see if corners are found
                 /*Point[] corner = corners.toArray();
                 for(Point px: corner)
