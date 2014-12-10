@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -68,6 +69,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         }
 
+
         @SuppressLint("NewApi")
         @Override
         protected Void doInBackground(Void... voids) {
@@ -109,7 +111,8 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 //Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Mat thresholdImage = new Mat(mRgba.size(), CvType.CV_8UC1);
                 Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2GRAY, 4);  // convert to greyscale
-                Imgproc.Canny(thresholdImage, thresholdImage, 100, 200);
+                int thresh = 50, ratio = 3;
+                Imgproc.Canny(thresholdImage, thresholdImage, thresh, ratio*thresh);
                 Mat lines = new Mat();  // mat to draw lines
 
                 // find the door color
@@ -132,12 +135,23 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 Log.i(TAG, "Count = " + count);
                 if(count > 400){
                     Log.i(TAG, "FOUND DOOR!");
+                    if(doorPressed) {
+                        publishProgress("command", "Door Found");
+                    }
                 } else {
                     Log.i(TAG, "NO DOOR!");
+                    if(doorPressed) {
+                    publishProgress("command", "Door Not Found");
+                    }
                 }
 
                 // magic
-                Imgproc.HoughLinesP(wallImage, lines, 1, Math.PI/180, threshold, minLineSize, lineGap);
+                if(gridPressed) {
+                    Imgproc.HoughLinesP(thresholdImage, lines, 1, Math.PI / 180, threshold, minLineSize, lineGap);
+                } else {
+                    Imgproc.HoughLinesP(wallImage, lines, 1, Math.PI / 180, threshold, minLineSize, lineGap);
+                }
+
                 double xRange = wallImage.cols();
                 boolean safe = false;
 
@@ -157,9 +171,15 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
 
 //                    draw onto our camera
-                    Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
+                 if(gridPressed) {
+                     Core.line(thresholdImage, start, end, new Scalar(135, 0, 0), 3);
+                 } else {
+                     Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
+                 }
+
                     // Find closest lines, check if point is near bottom and close to center
                 }
+                /*
                 if(safe) {
                     ArduinoController.move_robot(100f, true);
                     // at least a 1 second sleep is necessary between commands
@@ -188,14 +208,21 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                         Log.i(TAG, "Thread interrupted again!");
                         e.printStackTrace();
                     }
-                }
+                }*/
                 // Update camera image to see if corners are found
                 /*Point[] corner = corners.toArray();
                 for(Point px: corner)
                 { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
-
-                cameraPreview2Mat = wallImage;
+                if(wallPressed) {
+                    cameraPreview2Mat = wallImage;
+                } else if (doorPressed){
+                    cameraPreview2Mat = mask;
+                } else if (gridPressed){
+                    cameraPreview2Mat = thresholdImage;
+                } else {
+                    cameraPreview2Mat = wallImage;
+                }
                 //cameraPreview2Mat = wallImage;
                 //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
@@ -244,12 +271,20 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     EditText minLineSizeText;
     EditText lineGapText;
     Button updateBtn;
+    RadioButton doorRadioBtn;
+    RadioButton wallRadioBtn;
+    RadioButton gridRadioBtn;
 
     // OpenCv camera stuff (from: http://stackoverflow.com/questions/19213230/opencv-with-android-camera-surfaceview)
     protected CameraBridgeViewBase cameraPreview;
     protected ImageView cameraPreview2;
     public Mat mRgba;
     public Mat cameraPreview2Mat;
+    public boolean gridPressed = false;
+    public boolean doorPressed = false;
+    public boolean wallPressed = false;
+
+
     protected BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -323,18 +358,28 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         });
 
-        // setup textboxes
-        thresholdText = (EditText) findViewById(R.id.editText);
-        minLineSizeText = (EditText) findViewById(R.id.editText2);
-        lineGapText = (EditText) findViewById(R.id.editText3);
-        updateBtn = (Button) findViewById(R.id.updateButton);
-        updateBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // grab values from textbox
-                threshold = Integer.parseInt(thresholdText.getText().toString());
-                minLineSize = Integer.parseInt(minLineSizeText.getText().toString());
-                lineGap = Integer.parseInt(lineGapText.getText().toString());
+        doorRadioBtn = (RadioButton) findViewById(R.id.doorRadio);
+        wallRadioBtn = (RadioButton) findViewById(R.id.wallRadio);
+        gridRadioBtn = (RadioButton) findViewById(R.id.gridRadio);
+        doorRadioBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                doorPressed = true;
+                wallPressed = false;
+                gridPressed = false;
+            }
+        });
+        gridRadioBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                doorPressed = false;
+                wallPressed = false;
+                gridPressed = true;
+            }
+        });
+        wallRadioBtn.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                doorPressed = false;
+                wallPressed = true;
+                gridPressed = false;
             }
         });
 
