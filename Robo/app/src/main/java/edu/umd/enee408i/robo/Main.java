@@ -83,10 +83,29 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 // wait till camera is ready
                 while(mRgba == null);
                 // create new greyscale image
+                Mat mask = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
                 Mat thresholdImage = new Mat(mRgba.height() + mRgba.height() / 2, mRgba.width(), CvType.CV_8UC1);
-                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2HSV, 4);  // convert to HSV
-                // detect brown door between 127, 79, 33 and 150, 113, 41
-                Core.inRange(thresholdImage, new Scalar(40, 100, 30), new Scalar(45, 255, 255), thresholdImage);
+//                Imgproc.cvtColor(mRgba, thresholdImage, Imgproc.COLOR_RGB2HSV, 4);  // convert to HSV
+                // detect brown door using BGR
+                Core.inRange(mRgba, new Scalar(0, 0, 115), new Scalar(60, 255, 255), mask);
+                Core.bitwise_and(mRgba, thresholdImage, mask);
+                // calculate the percentage... the naive way... I'm sorry
+                int count = 0;
+                for(int row_i = 0; row_i < thresholdImage.rows(); row_i++){
+                    for(int col_i = 0; col_i < thresholdImage.cols(); col_i++){
+                        double pixel[] = thresholdImage.get(row_i, col_i);
+                        if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0){
+                            count++;
+                        }
+                    }
+                }
+                // if we find a certain number of pixels that are not black, we found the door
+                if(count > 100){
+                    // we found the door!
+                    Log.i(TAG, "Door has been found!!");
+                    ArduinoController.stop_robot();
+
+                }
 //                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_GRAY2BGR, 0);
 //                Imgproc.cvtColor(thresholdImage, thresholdImage, Imgproc.COLOR_BGR2RGBA, 0);
 
@@ -113,7 +132,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 //                }
 
 
-                cameraPreview2Mat = thresholdImage;
+                cameraPreview2Mat = mask;
                 publishProgress("camera");
 
 
