@@ -4,6 +4,7 @@
 #define RIGHT 1
 #define WALL_THRESHOLD 30   // wall Threshold in inches
 #define HIGH_SPEED 150
+#define WALL_SPEED 120
 #define LOW_SPEED 80
 #define STOP 0
 #define LEFT_OFFSET 6  // extra speed to compensate for left motor going slower
@@ -83,10 +84,10 @@ void loop() {
          rotate_robot(LOW_SPEED, atoi((const char*)(msg + 1)));
          break;
        case '<':
-         wall_follow(LOW_SPEED, LEFT);
+         wall_follow(WALL_SPEED, LEFT);
          break;
        case '>':
-         wall_follow(LOW_SPEED, RIGHT);
+         wall_follow(WALL_SPEED, RIGHT);
          break;
      }
   }
@@ -162,7 +163,7 @@ void move_robot(int wheel_speed, float rotations) {
     char msg;
     long left_inches = ping_inches(ping_left, 0);
     long right_inches = ping_inches(ping_right, 0);
-    if (left_inches < 20 || right_inches < 20 || (Serial.readBytes(&msg, 1) && msg == 'S')){
+    if (left_inches < 24 || right_inches < 24 || (Serial.readBytes(&msg, 1) && msg == 'S')){
       move_wheel(LEFT, STOP);
       move_wheel(RIGHT, STOP);
       Serial.write('S'); // notify we stopped instead of completed
