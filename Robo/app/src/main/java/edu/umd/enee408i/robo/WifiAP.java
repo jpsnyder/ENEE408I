@@ -1,5 +1,6 @@
 package edu.umd.enee408i.robo;
 
+// A class that handles starting up a Wifi-Hotspot
 // Got from: http://stackoverflow.com/questions/7048922/android-2-3-wifi-hotspot-api
 
 import android.app.Activity;

@@ -53,6 +53,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
         boolean isRunning;
 
+        // displays information from mapping task to GUI
         @Override
         protected void onProgressUpdate(String... progress) {
             // update found clients
@@ -70,28 +71,26 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         }
 
 
+        // This houses the infinite loop that runs the mapping algorithm
         @SuppressLint("NewApi")
         @Override
         protected Void doInBackground(Void... voids) {
             isRunning = true;
             while(isRunning) {
                 // Show found devices on wifi
-//                publishProgress("status", scanDevices());
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-////                    e.printStackTrace();
-//                }
+                publishProgress("status", scanDevices());
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 // wait till camera is ready
                 while(mRgba == null);
-                // create new greyscale image
-                Mat wallImage = new Mat(mRgba.size(), CvType.CV_8UC1);
-                //mRgba.convertTo(tempImage, -1, 1, 0);
-                Imgproc.cvtColor(mRgba, wallImage, Imgproc.COLOR_RGB2GRAY, 4);
-                //Imgproc.threshold(tempImage, tempImage, 100, 255, Imgproc.THRESH_BINARY);
 
-                // The following may be helpful for finding walls
+                // find a clear wall
+                Mat wallImage = new Mat(mRgba.size(), CvType.CV_8UC1);
+                Imgproc.cvtColor(mRgba, wallImage, Imgproc.COLOR_RGB2GRAY, 4);
                 Imgproc.GaussianBlur(wallImage, wallImage, new Size(7,7), 0);
                 Imgproc.adaptiveThreshold(wallImage, wallImage, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 23, 12);
                 int dilation_size = 3;
@@ -100,7 +99,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
 
                 Mat invertColorMatrix= new Mat(wallImage.rows(),wallImage.cols(), wallImage.type(), new Scalar(255,0,0));
                 Core.subtract(invertColorMatrix, wallImage, wallImage);
-                //Imgproc.adaptiveThreshold(tempImage, tempImage, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 17, 20);
+;
 
                 //
 
@@ -156,8 +155,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 boolean safe = false;
 
                 // draw the lines onto lines mat
-                for (int x = 0; x < lines.cols(); x++)
-                {
+                for (int x = 0; x < lines.cols(); x++){
                     double[] vec = lines.get(0, x);
                     double x1 = vec[0],
                             y1 = vec[1],
@@ -166,23 +164,21 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                     Point start = new Point(x1, y1);
                     Point end = new Point(x2, y2);
                     if(start.x < xRange / 3 && end.x > xRange * 2/3 || end.x < xRange / 3 && start.x > xRange * 2/3){
-                        safe = true;
+                        safe = true; // notify a wall has been found!
                     }
 
-
-//                    draw onto our camera
-                 if(gridPressed) {
-                     Core.line(thresholdImage, start, end, new Scalar(135, 0, 0), 3);
-                 } else {
-                     Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
-                 }
-
-                    // Find closest lines, check if point is near bottom and close to center
+                    //  draw onto our camera
+                    if(gridPressed) {
+                        Core.line(thresholdImage, start, end, new Scalar(135, 0, 0), 3);
+                    } else {
+                        Core.line(wallImage, start, end, new Scalar(135, 0, 0), 3);
+                    }
                 }
 
+                // if the wall has been found, move the robot to the wall then rotate, then wall follow
                 if(safe) {
                     ArduinoController.move_robot(100f, true);
-                    // at least a 1 second sleep is necessary between commands
+                    // FIXME: at least a 1 second sleep is necessary between commands
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -197,11 +193,12 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                         e.printStackTrace();
                     }
                     ArduinoController.wall_follow_right();
-                    while(!false);
+                    while(!false); // HACK: keep going forever until out of room
 
+                // if wall not found, rotate 10 degrees and try again
                 } else {
                     ArduinoController.rotate_robot(10f, true);
-                    // at least a 1 second sleep is necessary between commands
+                    // FIXME: at least a 1 second sleep is necessary between commands
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -209,11 +206,8 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                         e.printStackTrace();
                     }
                 }
-                // Update camera image to see if corners are found
-                /*Point[] corner = corners.toArray();
-                for(Point px: corner)
-                { Core.circle(thresholdImage, px, 15, new Scalar(255,0,0)); }*/
 
+                // display appropriate opencv image on GUI
                 if(wallPressed) {
                     cameraPreview2Mat = wallImage;
                 } else if (doorPressed){
@@ -223,42 +217,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
                 } else {
                     cameraPreview2Mat = wallImage;
                 }
-                //cameraPreview2Mat = wallImage;
-                //cameraPreview2Mat = thresholdImage;
                 publishProgress("camera");
-
-
-                // follow left wall
-//                Log.i(TAG, "Sending < to arduino");
-                //publishProgress("command", "<");
-                //ArduinoController.wall_follow_left();
-//                Log.i(TAG, "< command sent");
-
-//                Log.i(TAG, "Sending " + angle + " to arduino");
-//                publishProgress("command", "R" + Math.round(angle));
-//                ArduinoController.rotate_robot(new Float(angle), true);
-//                Log.i(TAG, "YAYY, IT WORKED!");
-
-
-
-                // stop the wall follow
-                Log.i(TAG, "Stop wall follow");
-                //ArduinoController.stop_robot();
-                Log.i(TAG, "Stopped");
-
-//                Log.i(TAG, "Sending D1 to arduino");
-//                publishProgress("command", "D1");
-//                ArduinoController.move_robot(new Float(1), true);
-//                Log.i(TAG, "YAYY, IT WORKED again!");
-//
-//                // at least a 1 second sleep is necessary between commands
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    Log.i(TAG, "Thread interrupted again!");
-//                    e.printStackTrace();
-//                }
-
             }
             return null;
         }
@@ -285,6 +244,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     public boolean wallPressed = false;
 
 
+    // required to connect to OpenCV Manager installed on device
     protected BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -313,13 +273,12 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     public static void updateButtonStatus() {
         if (wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLED || wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLING) {
             btnWifiToggle.setText("Turn off WifiAP");
-            //findViewById(R.id.bg).setBackgroundResource(R.drawable.bg_wifi_on);
         } else {
             btnWifiToggle.setText("Turn on WifiAP");
-            //findViewById(R.id.bg).setBackgroundResource(R.drawable.bg_wifi_off);
         }
     }
 
+    // scans all accessible devices connected to its Wifi hotspot
     private String scanDevices() {
         ArrayList<ClientScanResult> clients = wifiAP.getClientList(false, 300);
 
@@ -358,6 +317,7 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
             }
         });
 
+        // setup radio buttons
         doorRadioBtn = (RadioButton) findViewById(R.id.doorRadio);
         wallRadioBtn = (RadioButton) findViewById(R.id.wallRadio);
         gridRadioBtn = (RadioButton) findViewById(R.id.gridRadio);
@@ -413,13 +373,12 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
     @Override
     protected void onPause() {
         super.onPause();
+
+        // pause arduion controller and kill mapping task
         ArduinoController.pause();
-        mappingTask.isRunning = false;  // TODO: probably some data races.. but who cares?!
-//        try {
-            mappingTask.cancel(true);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        mappingTask.isRunning = false;
+        mappingTask.cancel(true);
+
 
         // Wifi stuff
         boolean wifiApIsOn = wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLED || wifiAP.getWifiAPState()==wifiAP.WIFI_AP_STATE_ENABLING;
@@ -455,14 +414,16 @@ public class Main extends Activity implements CameraBridgeViewBase.CvCameraViewL
         }
         updateButtonStatus();
 
+        // start Arduino Controller
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         Log.i(TAG, "Starting ArduinoController");
-        // wait a few seconds for opencv to get its shit together before starting arduinoController and mapping task
         statusText.setText(ArduinoController.start(this));
+
+        // start Mapping Task
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {

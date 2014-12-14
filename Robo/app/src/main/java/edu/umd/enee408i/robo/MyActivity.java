@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import org.opencv.core.Mat;  // Finally!!!!
 
-
+// a dead activity that we don't use but I'm too afraid to delete
 
 public class MyActivity extends Activity {
 

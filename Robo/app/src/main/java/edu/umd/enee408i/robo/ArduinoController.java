@@ -58,11 +58,12 @@ class ByteUtils {
     }
 }
 
+// static class that uses the usbSerialForAndroid library to communicate with the arduino
 public class ArduinoController {
 
     public static final String TAG = "ROBO_ArduinoController";
 
-    private static UsbSerialPort arduinoPort = null;  // arduino port
+    private static UsbSerialPort arduinoPort = null;
     private static UsbManager usbManager = null;
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -71,6 +72,7 @@ public class ArduinoController {
     // queue of received data from the Arduino
     public static Queue<String> retrievedData = new LinkedList<String>();
 
+    // listener function that runs when the arduino sends out data to the android
     private static final SerialInputOutputManager.Listener serialListener =
             new SerialInputOutputManager.Listener() {
 
@@ -110,7 +112,7 @@ public class ArduinoController {
         }
     }
 
-
+    // writes data to the arduino
     public static void write(byte[] data){
         if (arduinoPort == null) {
             Log.i(TAG, "write failed");
@@ -137,36 +139,42 @@ public class ArduinoController {
         write(ByteUtils.stringToBytes(">"));
     }
 
+    // moves the robot forward for the given distance (calls move_robot() in the arduino code)
+    // if wait == True, the function is blocking
     public static void move_robot(Float distance, boolean wait){
         String string = "D" + distance.toString() + "\r\n";
         retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
             Log.i(TAG, "move_robot is waiting....");
-            // wait for acknowledgment from arduino
-            while(retrievedData.isEmpty());
+            while(retrievedData.isEmpty());  // waits for any response from arduino
             Log.i(TAG, "move_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
 
+    // rotates the robot counter-clockwise the given angle (calls rotate_robot() in the arduino code)
+    // if wait == True, the function is blocking
     public static void rotate_robot(Float angle, boolean wait){
         String string = "R" + angle.toString() + "\r\n";
         retrievedData.clear();
         write(ByteUtils.stringToBytes(string));
         if (wait){
             Log.i(TAG, "rotate_robot is waiting....");
-            // wait for acknowledgment from arduino
-            while(retrievedData.isEmpty());
+            while(retrievedData.isEmpty());  // waits for any response from arduino
             Log.i(TAG, "rotate_robot: RETRIEVED DATA: " + retrievedData.peek());
         }
     }
 
+    // initializes the usb connection to the arduino
+    // returns the the status to be displayed on the GUI
     public static String start(Context context){
         Log.i(TAG, "Starting ArduinoController");
-        // Find all available drivers from attached devices
+
+        // set up usb manager
         if (usbManager == null)
             usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 
+        // get all available usb drivers
         Log.i(TAG, "Listing Drivers");
         SystemClock.sleep(1000);
         List<UsbSerialDriver> drivers =
@@ -175,15 +183,17 @@ public class ArduinoController {
             Log.i(TAG, "No drivers found!");
             return "No drivers found!";
         }
-        // TODO: for now we are assuming the first one is the arduino....
+
+        // look for a supported usb driver
         Log.i(TAG, "Drivers found: " + drivers.toString());
-        arduinoPort = drivers.get(0).getPorts().get(0);
+        arduinoPort = drivers.get(0).getPorts().get(0); // assume first one is the arduino
 
         if (arduinoPort == null) {
             Log.i(TAG, "Did not find arduino device.");
             return "Arduino Not Found!";
         }
 
+        // open the usb device
         UsbDevice device = arduinoPort.getDriver().getDevice();
         Log.i(TAG, "Connected to productID: " + device.getVendorId());
         UsbDeviceConnection connection = usbManager.openDevice(device);
@@ -192,6 +202,7 @@ public class ArduinoController {
             return "Opening device failed!";
         }
 
+        // open usb connection and set parity and baud rate
         try {
             arduinoPort.open(connection);
             // set to send over 8 bits
